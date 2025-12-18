@@ -1,0 +1,5 @@
+{
+  "name": "Duedilis Pipeline Propostas",
+  "description": "Plataforma de gestão de pipeline de propostas para concursos públicos portugueses, com suporte a importação de JSON de análise, orçamentação e propostas.",
+  "requestFramePermissions": []
+}
