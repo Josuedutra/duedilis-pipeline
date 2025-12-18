@@ -1,8 +1,5 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { getRhCosts, getRegionalFactors } from "./storage";
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export interface AIAnalysisResult {
   summary: string;
@@ -12,33 +9,46 @@ export interface AIAnalysisResult {
   financial_warning?: string;
 }
 
+// Lazy singleton (não inicializa no topo do módulo)
+let ai: GoogleGenAI | null = null;
+
+function getAI(): GoogleGenAI {
+  // Em Vite, env do frontend vem de import.meta.env e deve ser prefixada com VITE_
+  const apiKey = (import.meta.env.VITE_GEMINI_API_KEY as string | undefined)?.trim();
+
+  if (!apiKey) {
+    throw new Error("VITE_GEMINI_API_KEY is not set. Configure it in Vercel and redeploy.");
+  }
+
+  if (!ai) {
+    ai = new GoogleGenAI({ apiKey });
+  }
+  return ai;
+}
+
 export const analyzeProposal = async (proposalData: any): Promise<AIAnalysisResult> => {
   // Busca dinâmica dos dados de referência no Supabase
-  let rhCosts;
-  let regionalFactors;
-  
+  let rhCosts: any;
+  let regionalFactors: any;
+
   try {
-    const [costsData, factorsData] = await Promise.all([
-      getRhCosts(),
-      getRegionalFactors()
-    ]);
+    const [costsData, factorsData] = await Promise.all([getRhCosts(), getRegionalFactors()]);
     rhCosts = costsData;
     regionalFactors = factorsData;
   } catch (error) {
     console.warn("Falha ao buscar custos dinâmicos, usando fallback.", error);
-    // Caso as tabelas ainda não existam ou haja erro, injetamos uma string informativa
     rhCosts = "Tabela de custos não disponível dinamicamente (ainda).";
     regionalFactors = "Fatores regionais não disponíveis dinamicamente (ainda).";
   }
 
   const prompt = `
     Analise a seguinte proposta de concurso público e forneça um relatório estruturado em JSON.
-    
+
     DADOS DA PROPOSTA:
     Referência: ${proposalData.referencia_concurso}
     Objeto: ${proposalData.objeto}
     Entidade: ${proposalData.entidade_contratante}
-    Local de Execução: ${proposalData.local_execucao || 'Não especificado'}
+    Local de Execução: ${proposalData.local_execucao || "Não especificado"}
     Valor Base: ${proposalData.valor_base_edital}€
     Valor Proposto: ${proposalData.valor_proposto}€
     Prazo: ${proposalData.prazo_execucao_meses} meses
@@ -64,7 +74,9 @@ export const analyzeProposal = async (proposalData: any): Promise<AIAnalysisResu
     5. "financial_warning": Aviso se os custos superarem a receita.
   `;
 
-  const response = await ai.models.generateContent({
+  const aiClient = getAI();
+
+  const response = await aiClient.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: prompt,
     config: {
@@ -76,11 +88,12 @@ export const analyzeProposal = async (proposalData: any): Promise<AIAnalysisResu
           risks: { type: Type.ARRAY, items: { type: Type.STRING } },
           strengths: { type: Type.ARRAY, items: { type: Type.STRING } },
           strategy_suggestion: { type: Type.STRING },
-          financial_warning: { type: Type.STRING, description: "Aviso crítico de rentabilidade" }
+          financial_warning: { type: Type.STRING, description: "Aviso crítico de rentabilidade" },
         },
-        required: ["summary", "risks", "strengths", "strategy_suggestion"]
+        required: ["summary", "risks", "strengths", "strategy_suggestion"],
       },
-      systemInstruction: "És um consultor sénior especialista em concursos públicos (CCP) e controlo de gestão na Duedilis. O teu objetivo é garantir a rentabilidade máxima usando dados reais de custos."
+      systemInstruction:
+        "És um consultor sénior especialista em concursos públicos (CCP) e controlo de gestão na Duedilis. O teu objetivo é garantir a rentabilidade máxima usando dados reais de custos.",
     },
   });
 
