@@ -67,7 +67,7 @@ const App: React.FC = () => {
       await refreshProposals();
       setIsFormOpen(false);
       setIsImportModalOpen(false);
-      
+
       if (selectedProposal && selectedProposal.id === proposalToSave.id) {
         setSelectedProposal(proposalToSave);
       } else if (!editingProposal) {
@@ -131,8 +131,8 @@ ALTER TABLE propostas ADD COLUMN IF NOT EXISTS local_execucao TEXT;
 NOTIFY pgrst, 'reload schema';`;
 
   return (
-    <Layout 
-      currentPage={currentPage === 'detalhes' ? 'propostas' : currentPage} 
+    <Layout
+      currentPage={currentPage === 'detalhes' ? 'propostas' : currentPage}
       onNavigate={(p) => {
         if (p !== 'detalhes') refreshProposals();
         setCurrentPage(p as any);
@@ -159,31 +159,34 @@ NOTIFY pgrst, 'reload schema';`;
 
       {showSqlHint && (
         <div className="mb-8 p-6 bg-red-950 text-white rounded-[2rem] border border-red-800 animate-in slide-in-from-top-4">
-           <div className="flex items-center space-x-4 mb-4">
-             <ShieldAlert className="text-red-500" size={24} />
-             <h3 className="font-black uppercase text-sm">Atualização da Base de Dados Necessária</h3>
-           </div>
-           <div className="relative">
-             <pre className="bg-black/40 p-4 rounded-xl text-[10px] font-mono text-blue-300 overflow-x-auto mb-4">{SQL_SCRIPT}</pre>
-             <button 
-               onClick={() => { navigator.clipboard.writeText(SQL_SCRIPT); setCopied(true); setTimeout(() => setCopied(false), 2000); }} 
-               className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-[10px] font-black uppercase"
-             >
-               {copied ? <Check size={14} /> : <Copy size={14} />}
-               <span>{copied ? 'Copiado' : 'Copiar Script SQL'}</span>
-             </button>
-           </div>
-           <button onClick={() => setShowSqlHint(false)} className="mt-2 text-[10px] text-red-400 hover:text-white uppercase font-bold tracking-widest flex items-center space-x-1">
-             <X size={12} /> <span>Ignorar por agora</span>
-           </button>
+          <div className="flex items-center space-x-4 mb-4">
+            <ShieldAlert className="text-red-500" size={24} />
+            <div>
+              <h3 className="font-black uppercase text-sm">Atualização da Base de Dados Necessária</h3>
+              {error && <p className="text-xs font-mono text-pink-300 mt-1">{error}</p>}
+            </div>
+          </div>
+          <div className="relative">
+            <pre className="bg-black/40 p-4 rounded-xl text-[10px] font-mono text-blue-300 overflow-x-auto mb-4">{SQL_SCRIPT}</pre>
+            <button
+              onClick={() => { navigator.clipboard.writeText(SQL_SCRIPT); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+              className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-[10px] font-black uppercase"
+            >
+              {copied ? <Check size={14} /> : <Copy size={14} />}
+              <span>{copied ? 'Copiado' : 'Copiar Script SQL'}</span>
+            </button>
+          </div>
+          <button onClick={() => setShowSqlHint(false)} className="mt-2 text-[10px] text-red-400 hover:text-white uppercase font-bold tracking-widest flex items-center space-x-1">
+            <X size={12} /> <span>Ignorar por agora</span>
+          </button>
         </div>
       )}
 
       {currentPage === 'dashboard' && <Dashboard proposals={proposals} onSelect={handleSelect} />}
       {currentPage === 'propostas' && (
-        <ProposalsList 
-          proposals={proposals} 
-          onSelect={handleSelect} 
+        <ProposalsList
+          proposals={proposals}
+          onSelect={handleSelect}
           onImport={() => setIsImportModalOpen(true)}
           onNew={() => { setEditingProposal(null); setIsFormOpen(true); }}
           onDelete={setConfirmDeleteId}
@@ -193,11 +196,11 @@ NOTIFY pgrst, 'reload schema';`;
         <KanbanBoard proposals={proposals} onMoveProposal={handleMoveProposal} onSelect={handleSelect} onDelete={setConfirmDeleteId} />
       )}
       {currentPage === 'detalhes' && selectedProposal && (
-        <ProposalDetails 
-          proposal={selectedProposal} 
-          onBack={() => setCurrentPage('propostas')} 
-          onDelete={setConfirmDeleteId} 
-          onEdit={() => { setEditingProposal(selectedProposal); setIsFormOpen(true); }} 
+        <ProposalDetails
+          proposal={selectedProposal}
+          onBack={() => setCurrentPage('propostas')}
+          onDelete={setConfirmDeleteId}
+          onEdit={() => { setEditingProposal(selectedProposal); setIsFormOpen(true); }}
         />
       )}
 
