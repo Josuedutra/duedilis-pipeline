@@ -301,7 +301,7 @@ const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onBack, onD
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center space-x-2"><Calculator size={16} /><span>Resumo Financeiro e Orçamento</span></h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                    <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Preço Venda (S/ IVA)</p>
+                    <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Preço Base</p>
                     <p className="text-sm font-bold text-slate-900">{formatCurrency(currentProposal.valor_proposto || currentProposal.orcamento_detalhado?.total.preco_base_eur || 0)}</p>
                   </div>
                   <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
