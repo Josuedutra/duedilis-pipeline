@@ -9,7 +9,7 @@ import ProposalForm from './components/ProposalForm';
 import KanbanBoard from './components/KanbanBoard';
 import { Proposta, EstadoProposta } from './types';
 import { getProposals, saveProposal, deleteProposal, getProposalById } from './services/storage';
-import { parseBudgetJson, parseDecisionJson } from './services/importer';
+import { parseSkillJson, parseBudgetJson, parseDecisionJson } from './services/importer';
 import { Loader2, ShieldAlert, Copy, Check, X } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -130,6 +130,11 @@ const App: React.FC = () => {
     setIsLoading(true);
     try {
       const text = await file.text();
+
+      // Parse Full Proposal Data (Phase 1) - para atualizar custos, margens e equipa no root
+      const proposalUpdates = parseSkillJson(text);
+
+      // Parse Budget Data (Phase 2) - para detalhes e lotes
       const budgetData = parseBudgetJson(text);
 
       const proposal = proposals.find(p => p.id === id);
@@ -137,6 +142,7 @@ const App: React.FC = () => {
 
       const updated = {
         ...proposal,
+        ...proposalUpdates, // Aplica atualizações de nível raiz (custos, equipa, etc)
         orcamento_detalhado: budgetData,
         updated_at: new Date().toISOString()
       };

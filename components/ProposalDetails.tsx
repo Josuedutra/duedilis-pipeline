@@ -118,8 +118,14 @@ const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onBack, onD
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Delegar para o App.tsx via prop
-    onImportBudget(currentProposal.id, file);
+    try {
+      // Delegar para o App.tsx via prop e aguardar conclusão
+      await onImportBudget(currentProposal.id, file);
+      alert('Orçamento importado com sucesso!');
+      // A atualização do prop 'proposal' irá disparar o useEffect acima
+    } catch (err) {
+      alert('Erro ao importar: ' + (err as Error).message);
+    }
 
     // Limpar input
     if (budgetInputRef.current) budgetInputRef.current.value = '';
@@ -290,6 +296,38 @@ const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onBack, onD
                   })}
                 </div>
               </div>
+              {/* CARD: Resumo Financeiro (Novo) */}
+              <div className="lg:col-span-2 space-y-6">
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center space-x-2"><Calculator size={16} /><span>Resumo Financeiro e Orçamento</span></h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Preço Venda (S/ IVA)</p>
+                    <p className="text-sm font-bold text-slate-900">{formatCurrency(currentProposal.valor_proposto || currentProposal.orcamento_detalhado?.total.preco_base_eur || 0)}</p>
+                  </div>
+                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Custo Real Estimado</p>
+                    <p className="text-sm font-bold text-blue-600">{formatCurrency(currentProposal.orcamento_detalhado?.total.custo_real_eur || 0)}</p>
+                  </div>
+                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Margem / Gap</p>
+                    <p className={`text-sm font-bold ${currentProposal.orcamento_detalhado?.total.gap_eur && currentProposal.orcamento_detalhado.total.gap_eur < 0 ? 'text-red-500' : 'text-emerald-500'}`}>
+                      {formatCurrency(currentProposal.orcamento_detalhado?.total.gap_eur || 0)}
+                    </p>
+                  </div>
+                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Rentabilidade</p>
+                    <p className={`text-sm font-bold ${currentProposal.orcamento_detalhado?.total.gap_pct && currentProposal.orcamento_detalhado.total.gap_pct < 0 ? 'text-red-500' : 'text-emerald-500'}`}>
+                      {currentProposal.orcamento_detalhado?.total.gap_pct?.toFixed(1) || 0}%
+                    </p>
+                  </div>
+                </div>
+                {currentProposal.orcamento_detalhado?.recomendacao && (
+                  <div className="p-4 bg-purple-50 rounded-2xl border border-purple-100 text-purple-900 text-xs font-medium">
+                    <strong>Recomendação:</strong> {currentProposal.orcamento_detalhado.recomendacao}
+                  </div>
+                )}
+              </div>
+
               <div className="lg:col-span-2 space-y-6">
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center space-x-2"><Building2 size={16} /><span>Dados do Projeto</span></h3>
                 <div className="grid grid-cols-2 gap-4">
