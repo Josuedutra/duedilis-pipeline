@@ -203,122 +203,123 @@ const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onBack, onD
         </div>
 
         <div className="p-10">
-          {activeTab === 'info' && (
-            {/* RELATÓRIO DE DECISÃO (Header) */ }
-          {proposal.relatorio_decisao && (
-            <div className={`p-6 rounded-2xl border ${proposal.relatorio_decisao.decisao.tipo === 'ADJUDICADO' ? 'bg-emerald-50 border-emerald-100' :
+          {activeTab === 'info' && (<>
+            {/* RELATÓRIO DE DECISÃO (Header) */}
+            {proposal.relatorio_decisao && (
+              <div className={`p-6 rounded-2xl border ${proposal.relatorio_decisao.decisao.tipo === 'ADJUDICADO' ? 'bg-emerald-50 border-emerald-100' :
                 proposal.relatorio_decisao.decisao.tipo === 'DECLINADO' ? 'bg-red-50 border-red-100' : 'bg-slate-50 border-slate-100'
-              }`}>
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <ClipboardList className={
-                      proposal.relatorio_decisao.decisao.tipo === 'ADJUDICADO' ? 'text-emerald-600' :
-                        proposal.relatorio_decisao.decisao.tipo === 'DECLINADO' ? 'text-red-600' : 'text-slate-600'
-                    } size={20} />
-                    <h3 className={`text-lg font-bold ${proposal.relatorio_decisao.decisao.tipo === 'ADJUDICADO' ? 'text-emerald-800' :
+                }`}>
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <ClipboardList className={
+                        proposal.relatorio_decisao.decisao.tipo === 'ADJUDICADO' ? 'text-emerald-600' :
+                          proposal.relatorio_decisao.decisao.tipo === 'DECLINADO' ? 'text-red-600' : 'text-slate-600'
+                      } size={20} />
+                      <h3 className={`text-lg font-bold ${proposal.relatorio_decisao.decisao.tipo === 'ADJUDICADO' ? 'text-emerald-800' :
                         proposal.relatorio_decisao.decisao.tipo === 'DECLINADO' ? 'text-red-800' : 'text-slate-800'
-                      }`}>
-                      Relatório de Decisão: {proposal.relatorio_decisao.decisao.tipo}
-                    </h3>
+                        }`}>
+                        Relatório de Decisão: {proposal.relatorio_decisao.decisao.tipo}
+                      </h3>
+                    </div>
+                    <div className="text-sm opacity-75 ml-7">
+                      Decidido por <strong>{proposal.relatorio_decisao.decisao.decidido_por}</strong> em {new Date(proposal.relatorio_decisao.decisao.data_decisao).toLocaleDateString('pt-PT')}
+                    </div>
                   </div>
-                  <div className="text-sm opacity-75 ml-7">
-                    Decidido por <strong>{proposal.relatorio_decisao.decisao.decidido_por}</strong> em {new Date(proposal.relatorio_decisao.decisao.data_decisao).toLocaleDateString('pt-PT')}
-                  </div>
+                  {proposal.relatorio_decisao.decisao.tipo === 'ADJUDICADO' ? <CheckCircle className="text-emerald-600" size={28} /> : <AlertTriangle className="text-red-600" size={28} />}
                 </div>
-                {proposal.relatorio_decisao.decisao.tipo === 'ADJUDICADO' ? <CheckCircle className="text-emerald-600" size={28} /> : <AlertTriangle className="text-red-600" size={28} />}
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 ml-1">
-                {(proposal.relatorio_decisao.motivos_recusa?.length || 0) > 0 && (
-                  <div className="bg-white/60 p-4 rounded-xl border border-white/50">
-                    <h4 className="text-xs font-bold uppercase tracking-wider mb-3 opacity-70 flex items-center gap-2">
-                      <FileWarning size={14} /> Motivos da Decisão
-                    </h4>
-                    <ul className="space-y-2">
-                      {proposal.relatorio_decisao.motivos_recusa?.map((m, i) => (
-                        <li key={i} className="text-sm flex items-start gap-2">
-                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />
-                          <span>{m}</span>
-                        </li>
-                      ))}
-                    </ul>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 ml-1">
+                  {(proposal.relatorio_decisao.motivos_recusa?.length || 0) > 0 && (
+                    <div className="bg-white/60 p-4 rounded-xl border border-white/50">
+                      <h4 className="text-xs font-bold uppercase tracking-wider mb-3 opacity-70 flex items-center gap-2">
+                        <FileWarning size={14} /> Motivos da Decisão
+                      </h4>
+                      <ul className="space-y-2">
+                        {proposal.relatorio_decisao.motivos_recusa?.map((m, i) => (
+                          <li key={i} className="text-sm flex items-start gap-2">
+                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />
+                            <span>{m}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {(proposal.relatorio_decisao.licoes_aprendidas?.length || 0) > 0 && (
+                    <div className="bg-white/60 p-4 rounded-xl border border-white/50">
+                      <h4 className="text-xs font-bold uppercase tracking-wider mb-3 opacity-70 flex items-center gap-2">
+                        <Sparkles size={14} /> Lições Aprendidas
+                      </h4>
+                      <ul className="space-y-2">
+                        {proposal.relatorio_decisao.licoes_aprendidas?.map((l, i) => (
+                          <li key={i} className="text-sm flex items-start gap-2">
+                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+                            <span>{l}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                {proposal.relatorio_decisao.proximos_passos && (
+                  <div className="mt-4 pt-4 border-t border-black/5 ml-1">
+                    <h4 className="text-xs font-bold uppercase tracking-wider mb-1 opacity-60">Próximos Passos</h4>
+                    <p className="text-sm font-medium">{proposal.relatorio_decisao.proximos_passos}</p>
                   </div>
                 )}
-
-                {(proposal.relatorio_decisao.licoes_aprendidas?.length || 0) > 0 && (
-                  <div className="bg-white/60 p-4 rounded-xl border border-white/50">
-                    <h4 className="text-xs font-bold uppercase tracking-wider mb-3 opacity-70 flex items-center gap-2">
-                      <Sparkles size={14} /> Lições Aprendidas
-                    </h4>
-                    <ul className="space-y-2">
-                      {proposal.relatorio_decisao.licoes_aprendidas?.map((l, i) => (
-                        <li key={i} className="text-sm flex items-start gap-2">
-                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
-                          <span>{l}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
               </div>
+            )}
 
-              {proposal.relatorio_decisao.proximos_passos && (
-                <div className="mt-4 pt-4 border-t border-black/5 ml-1">
-                  <h4 className="text-xs font-bold uppercase tracking-wider mb-1 opacity-60">Próximos Passos</h4>
-                  <p className="text-sm font-medium">{proposal.relatorio_decisao.proximos_passos}</p>
-                </div>
-              )}
-            </div>
-          )}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 animate-in fade-in duration-300">
+              <div className="space-y-6">
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center space-x-2"><Users size={16} /><span>Equipa Técnica</span></h3>
+                <div className="space-y-3">
+                  {currentProposal.equipa_resumo?.map((m, i) => {
+                    const baseCost = getBaseMonthlyCost(m);
+                    const alloc = m.dedicacao_percentual || 0;
+                    const allocatedMonthly = baseCost * (alloc / 100);
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 animate-in fade-in duration-300">
-            <div className="space-y-6">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center space-x-2"><Users size={16} /><span>Equipa Técnica</span></h3>
-              <div className="space-y-3">
-                {currentProposal.equipa_resumo?.map((m, i) => {
-                  const baseCost = getBaseMonthlyCost(m);
-                  const alloc = m.dedicacao_percentual || 0;
-                  const allocatedMonthly = baseCost * (alloc / 100);
-
-                  return (
-                    <div key={i} className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-blue-200 transition-all">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-slate-800 truncate">{m.cargo}</p>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <span className="bg-blue-100 text-blue-700 text-[9px] px-1.5 py-0.5 rounded-md font-black">{alloc}% Aloc.</span>
-                          <span className="text-[10px] text-slate-400 font-medium">
-                            {formatCurrency(baseCost)} x {alloc}%
-                          </span>
+                    return (
+                      <div key={i} className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-blue-200 transition-all">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-slate-800 truncate">{m.cargo}</p>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <span className="bg-blue-100 text-blue-700 text-[9px] px-1.5 py-0.5 rounded-md font-black">{alloc}% Aloc.</span>
+                            <span className="text-[10px] text-slate-400 font-medium">
+                              {formatCurrency(baseCost)} x {alloc}%
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-right ml-4">
+                          <p className="font-black text-sm text-slate-900">{formatCurrency(allocatedMonthly)}</p>
+                          <p className="text-[9px] text-slate-400 uppercase font-bold tracking-tight">/ mês efetivo</p>
                         </div>
                       </div>
-                      <div className="text-right ml-4">
-                        <p className="font-black text-sm text-slate-900">{formatCurrency(allocatedMonthly)}</p>
-                        <p className="text-[9px] text-slate-400 uppercase font-bold tracking-tight">/ mês efetivo</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="lg:col-span-2 space-y-6">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center space-x-2"><Building2 size={16} /><span>Dados do Projeto</span></h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Local de Execução</p>
-                  <p className="text-sm font-bold text-slate-900">{currentProposal.local_execucao || 'Nacional / Sede'}</p>
-                </div>
-                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Custo RH Total ({currentProposal.prazo_execucao_meses} meses)</p>
-                  <p className="text-sm font-bold text-blue-600">{formatCurrency(rhTotalCost)}</p>
+                    );
+                  })}
                 </div>
               </div>
-              <div className="p-8 bg-slate-50 rounded-2xl border border-slate-100 text-slate-700 italic text-sm leading-relaxed">
-                "{currentProposal.objeto}"
+              <div className="lg:col-span-2 space-y-6">
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center space-x-2"><Building2 size={16} /><span>Dados do Projeto</span></h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                    <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Local de Execução</p>
+                    <p className="text-sm font-bold text-slate-900">{currentProposal.local_execucao || 'Nacional / Sede'}</p>
+                  </div>
+                  <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                    <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Custo RH Total ({currentProposal.prazo_execucao_meses} meses)</p>
+                    <p className="text-sm font-bold text-blue-600">{formatCurrency(rhTotalCost)}</p>
+                  </div>
+                </div>
+                <div className="p-8 bg-slate-50 rounded-2xl border border-slate-100 text-slate-700 italic text-sm leading-relaxed">
+                  "{currentProposal.objeto}"
+                </div>
               </div>
             </div>
-          </div>
-          )}
+          </>)}
+
 
           {activeTab === 'finance' && (
             <div className="space-y-10 animate-in fade-in duration-300">
