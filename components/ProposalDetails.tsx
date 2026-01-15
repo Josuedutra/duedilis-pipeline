@@ -465,84 +465,83 @@ const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onBack, onD
                   </p>
                 </div>
               </div>
-            </div >
-            </div >
+            </div>
           )}
 
-        {
-          activeTab === 'ai' && (
-            <div className="animate-in fade-in duration-500">
-              {aiResult ? (
-                <div className="space-y-8">
-                  {aiResult.financial_warning && (
-                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-center space-x-3 text-amber-800">
-                      <FileWarning size={20} className="shrink-0" />
-                      <p className="text-sm font-bold">{aiResult.financial_warning}</p>
-                    </div>
-                  )}
-                  <div className="p-8 bg-slate-900 rounded-[2.5rem] text-white">
-                    <h3 className="text-2xl font-black mb-4 flex items-center space-x-3 tracking-tight italic">
-                      <Sparkles className="text-blue-400" />
-                      <span>Análise IA</span>
-                    </h3>
-                    <p className="text-slate-300 leading-relaxed text-lg">{aiResult.summary}</p>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="bg-red-50 p-8 rounded-[2.5rem] border border-red-100">
-                      <h4 className="font-black text-red-800 uppercase text-xs mb-6 flex items-center space-x-2"><ShieldAlert size={16} /><span>Riscos</span></h4>
-                      <ul className="space-y-4">
-                        {aiResult.risks.map((r, i) => <li key={i} className="text-red-900 text-sm font-medium">• {r}</li>)}
-                      </ul>
-                    </div>
-                    <div className="bg-green-50 p-8 rounded-[2.5rem] border border-green-100">
-                      <h4 className="font-black text-green-800 uppercase text-xs mb-6 flex items-center space-x-2"><Target size={16} /><span>Pontos Fortes</span></h4>
-                      <ul className="space-y-4">
-                        {aiResult.strengths.map((s, i) => <li key={i} className="text-green-900 text-sm font-medium">• {s}</li>)}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-20">
-                  <button onClick={handleRunAI} className="px-8 py-3 bg-slate-900 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest">Analisar com IA</button>
-                </div>
-              )}
-            </div>
-          )
-        }
-
-        {
-          activeTab === 'docs' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-in fade-in duration-300">
-              {[
-                { name: 'Análise do Edital', type: 'pdf_analise', icon: FileText, desc: 'Análise técnica de requisitos.' },
-                { name: 'Cálculo de Orçamento', type: 'pdf_orcamento', icon: Briefcase, desc: 'Folha de cálculo Skill/Excel.' },
-                { name: 'Proposta Técnica', type: 'pdf_proposta', icon: CheckCircle2, desc: 'Ficheiro final submetido.' },
-                { name: 'Ata de Abertura', type: 'pdf_ata_abertura', icon: Gavel, desc: 'Documento público de concorrência.' },
-                { name: 'Relatório Final', type: 'pdf_relatorio_final', icon: FileCheck, desc: 'Relatório de adjudicação.' }
-              ].map((doc) => {
-                const fileUrl = (currentProposal as any)[doc.type];
-                return (
-                  <div key={doc.type} className={`p-8 rounded-[2.5rem] border transition-all relative overflow-hidden group ${fileUrl ? 'bg-slate-50 border-slate-200' : 'bg-slate-50/50 border-slate-100 border-dashed'}`}>
-                    <div className="flex items-start justify-between mb-8">
-                      <div className={`p-4 rounded-2xl ${fileUrl ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-400'}`}>
-                        <doc.icon size={28} />
+          {
+            activeTab === 'ai' && (
+              <div className="animate-in fade-in duration-500">
+                {aiResult ? (
+                  <div className="space-y-8">
+                    {aiResult.financial_warning && (
+                      <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-center space-x-3 text-amber-800">
+                        <FileWarning size={20} className="shrink-0" />
+                        <p className="text-sm font-bold">{aiResult.financial_warning}</p>
                       </div>
-                      {fileUrl && <a href={fileUrl} target="_blank" className="p-3 bg-white border border-slate-200 rounded-xl text-slate-600 hover:text-blue-600 transition-all"><ExternalLink size={18} /></a>}
+                    )}
+                    <div className="p-8 bg-slate-900 rounded-[2.5rem] text-white">
+                      <h3 className="text-2xl font-black mb-4 flex items-center space-x-3 tracking-tight italic">
+                        <Sparkles className="text-blue-400" />
+                        <span>Análise IA</span>
+                      </h3>
+                      <p className="text-slate-300 leading-relaxed text-lg">{aiResult.summary}</p>
                     </div>
-                    <h4 className="font-black text-slate-900 text-lg mb-1">{doc.name}</h4>
-                    <p className="text-xs text-slate-500 mb-8">{doc.desc}</p>
-                    <button onClick={() => { setTargetDocType(doc.type); fileInputRef.current?.click(); }} className="w-full py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-black uppercase text-[10px] tracking-widest rounded-xl transition-all">
-                      {fileUrl ? 'Substituir PDF' : 'Carregar PDF'}
-                    </button>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="bg-red-50 p-8 rounded-[2.5rem] border border-red-100">
+                        <h4 className="font-black text-red-800 uppercase text-xs mb-6 flex items-center space-x-2"><ShieldAlert size={16} /><span>Riscos</span></h4>
+                        <ul className="space-y-4">
+                          {aiResult.risks.map((r, i) => <li key={i} className="text-red-900 text-sm font-medium">• {r}</li>)}
+                        </ul>
+                      </div>
+                      <div className="bg-green-50 p-8 rounded-[2.5rem] border border-green-100">
+                        <h4 className="font-black text-green-800 uppercase text-xs mb-6 flex items-center space-x-2"><Target size={16} /><span>Pontos Fortes</span></h4>
+                        <ul className="space-y-4">
+                          {aiResult.strengths.map((s, i) => <li key={i} className="text-green-900 text-sm font-medium">• {s}</li>)}
+                        </ul>
+                      </div>
+                    </div>
                   </div>
-                );
-              })}
-            </div>
-          )
-        }
+                ) : (
+                  <div className="text-center py-20">
+                    <button onClick={handleRunAI} className="px-8 py-3 bg-slate-900 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest">Analisar com IA</button>
+                  </div>
+                )}
+              </div>
+            )
+          }
+
+          {
+            activeTab === 'docs' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-in fade-in duration-300">
+                {[
+                  { name: 'Análise do Edital', type: 'pdf_analise', icon: FileText, desc: 'Análise técnica de requisitos.' },
+                  { name: 'Cálculo de Orçamento', type: 'pdf_orcamento', icon: Briefcase, desc: 'Folha de cálculo Skill/Excel.' },
+                  { name: 'Proposta Técnica', type: 'pdf_proposta', icon: CheckCircle2, desc: 'Ficheiro final submetido.' },
+                  { name: 'Ata de Abertura', type: 'pdf_ata_abertura', icon: Gavel, desc: 'Documento público de concorrência.' },
+                  { name: 'Relatório Final', type: 'pdf_relatorio_final', icon: FileCheck, desc: 'Relatório de adjudicação.' }
+                ].map((doc) => {
+                  const fileUrl = (currentProposal as any)[doc.type];
+                  return (
+                    <div key={doc.type} className={`p-8 rounded-[2.5rem] border transition-all relative overflow-hidden group ${fileUrl ? 'bg-slate-50 border-slate-200' : 'bg-slate-50/50 border-slate-100 border-dashed'}`}>
+                      <div className="flex items-start justify-between mb-8">
+                        <div className={`p-4 rounded-2xl ${fileUrl ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-400'}`}>
+                          <doc.icon size={28} />
+                        </div>
+                        {fileUrl && <a href={fileUrl} target="_blank" className="p-3 bg-white border border-slate-200 rounded-xl text-slate-600 hover:text-blue-600 transition-all"><ExternalLink size={18} /></a>}
+                      </div>
+                      <h4 className="font-black text-slate-900 text-lg mb-1">{doc.name}</h4>
+                      <p className="text-xs text-slate-500 mb-8">{doc.desc}</p>
+                      <button onClick={() => { setTargetDocType(doc.type); fileInputRef.current?.click(); }} className="w-full py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-black uppercase text-[10px] tracking-widest rounded-xl transition-all">
+                        {fileUrl ? 'Substituir PDF' : 'Carregar PDF'}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )
+          }
+        </div >
       </div >
-    </div >
     </div >
   );
 };
