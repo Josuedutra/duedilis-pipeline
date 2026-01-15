@@ -163,23 +163,39 @@ export const parseBudgetJson = (jsonStr: string): OrcamentoDetalhado => {
     // Chaves típicas: identificacao, resumo_custos, etc.
     if (!root.lotes && root.resumo_custos) {
       // Tentar construir um orçamento a partir do resumo
+      // Tentar construir um orçamento a partir do resumo
       const rc = root.resumo_custos;
-      const totalEur = typeof rc.preco_venda === 'number' ? rc.preco_venda : 0;
-      const custoReal = typeof rc.total_custos === 'number' ? rc.total_custos : 0;
+
+      // Mapeamento flexível de chaves
+      const totalEur =
+        (typeof rc.preco_venda === 'number' ? rc.preco_venda : 0) ||
+        (typeof rc.valor_proposta_sem_iva_eur === 'number' ? rc.valor_proposta_sem_iva_eur : 0) || 0;
+
+      const custoReal =
+        (typeof rc.total_custos === 'number' ? rc.total_custos : 0) ||
+        (typeof rc.base_custo_eur === 'number' ? rc.base_custo_eur : 0) || 0;
+
+      const custosDiretosEquipa =
+        root.custos_diretos_equipa?.total_equipa_eur ||
+        root.custos_diretos_equipa?.total || 0;
+
+      const outrosCustosDiretos =
+        root.outros_custos_diretos?.total_outros_diretos_eur ||
+        root.outros_custos_diretos?.total || 0;
 
       const orcamentoAdaptado: OrcamentoDetalhado = {
-        fase: 1, // Assumimos fase 1 pois parece ser do import inicial
+        fase: 1,
         data_calculo: new Date().toISOString().split('T')[0],
         lotes: [
           {
             lote: "Geral",
             descricao: "Orçamento Global (Importado de Resumo)",
-            preco_base_eur: totalEur, // Assumindo venda como base? Ou zero? Vamos tentar usar valores_referencia se existir.
-            custos_diretos_equipa_eur: root.custos_diretos_equipa?.total || 0,
-            outros_custos_diretos_eur: root.outros_custos_diretos?.total || 0,
-            total_custos_diretos_eur: (root.custos_diretos_equipa?.total || 0) + (root.outros_custos_diretos?.total || 0),
+            preco_base_eur: totalEur,
+            custos_diretos_equipa_eur: custosDiretosEquipa,
+            outros_custos_diretos_eur: outrosCustosDiretos,
+            total_custos_diretos_eur: custosDiretosEquipa + outrosCustosDiretos,
             custos_indiretos_pct: rc.custos_indiretos_pct || 0,
-            custos_indiretos_eur: rc.custos_indiretos || 0,
+            custos_indiretos_eur: rc.custos_indiretos_eur || rc.custos_indiretos || 0,
             base_custo_eur: custoReal,
             gap_vs_preco_base_eur: 0,
             gap_vs_preco_base_pct: 0,
@@ -192,14 +208,20 @@ export const parseBudgetJson = (jsonStr: string): OrcamentoDetalhado => {
           gap_eur: totalEur - custoReal,
           gap_pct: totalEur ? ((totalEur - custoReal) / totalEur) * 100 : 0
         },
-        recomendacao: root.recomendacao ? root.recomendacao.join('\n') : '',
+        recomendacao: (typeof root.recomendacao === 'string')
+          ? root.recomendacao
+          : (Array.isArray(root.recomendacao)
+            ? root.recomendacao.join('\n')
+            : (root.recomendacao?.justificacao || '')),
         alertas: root.alertas
       };
 
       // Tentar melhorar preco_base se houver valores_referencia
-      if (root.valores_referencia && root.valores_referencia.valor_base) {
-        orcamentoAdaptado.lotes[0].preco_base_eur = root.valores_referencia.valor_base;
-        orcamentoAdaptado.total.preco_base_eur = root.valores_referencia.valor_base;
+      const refValorBase = root.valores_referencia?.valor_base || root.valores_referencia?.preco_base_eur;
+
+      if (refValorBase) {
+        orcamentoAdaptado.lotes[0].preco_base_eur = refValorBase;
+        orcamentoAdaptado.total.preco_base_eur = refValorBase;
         const gap = orcamentoAdaptado.total.preco_base_eur - orcamentoAdaptado.total.custo_real_eur;
         orcamentoAdaptado.total.gap_eur = gap;
         orcamentoAdaptado.lotes[0].gap_vs_preco_base_eur = gap;
