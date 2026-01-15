@@ -18,8 +18,8 @@ const ProposalsList: React.FC<ProposalsListProps> = ({ proposals, onSelect, onIm
 
   const filtered = proposals.filter(p => {
     const matchesSearch = p.referencia_concurso.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        p.entidade_contratante.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        p.objeto.toLowerCase().includes(searchTerm.toLowerCase());
+      p.entidade_contratante.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.objeto.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesEstado = estadoFilter === 'todos' || p.estado === estadoFilter;
     return matchesSearch && matchesEstado;
   });
@@ -81,7 +81,8 @@ const ProposalsList: React.FC<ProposalsListProps> = ({ proposals, onSelect, onIm
               <tr>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Referência</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Entidade</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Valor</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Valor Base</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Valor Proposta</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Estado</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Prazo</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Ações</th>
@@ -89,11 +90,11 @@ const ProposalsList: React.FC<ProposalsListProps> = ({ proposals, onSelect, onIm
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filtered.map(p => {
-                 const diff = new Date(p.data_limite_submissao).getTime() - Date.now();
-                 const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-                 const isUrgent = p.estado === EstadoProposta.PREPARACAO && days < 3;
+                const diff = new Date(p.data_limite_submissao).getTime() - Date.now();
+                const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                const isUrgent = p.estado === EstadoProposta.PREPARACAO && days < 3;
 
-                 return (
+                return (
                   <tr key={p.id} onClick={() => onSelect(p.id)} className="hover:bg-slate-50/50 transition-colors group cursor-pointer">
                     <td className="px-6 py-4">
                       <div className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{p.referencia_concurso}</div>
@@ -101,6 +102,9 @@ const ProposalsList: React.FC<ProposalsListProps> = ({ proposals, onSelect, onIm
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-slate-700 max-w-[200px] truncate">{p.entidade_contratante}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-xs font-medium text-slate-500">{formatCurrency(p.valor_base_edital)}</div>
                     </td>
                     <td className="px-6 py-4 font-bold text-sm text-slate-900">
                       {formatCurrency(p.valor_proposto)}
@@ -119,14 +123,14 @@ const ProposalsList: React.FC<ProposalsListProps> = ({ proposals, onSelect, onIm
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); onSelect(p.id); }} 
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onSelect(p.id); }}
                           className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         >
                           <Eye size={18} />
                         </button>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); onDelete(p.id); }} 
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onDelete(p.id); }}
                           className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         >
                           <Trash2 size={18} />
@@ -134,7 +138,7 @@ const ProposalsList: React.FC<ProposalsListProps> = ({ proposals, onSelect, onIm
                       </div>
                     </td>
                   </tr>
-                 );
+                );
               })}
             </tbody>
           </table>
