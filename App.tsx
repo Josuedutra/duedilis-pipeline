@@ -130,32 +130,65 @@ const App: React.FC = () => {
     setIsLoading(true);
     try {
       const text = await file.text();
+      let rawData;
+      try {
+        rawData = JSON.parse(text);
+        if (Array.isArray(rawData)) rawData = rawData[0];
+      } catch (e) {
+        throw new Error('JSON inválido');
+      }
 
-      // Parse Full Proposal Data (Phase 1) - para atualizar custos, margens e equipa no root
-      const proposalUpdates = parseSkillJson(text);
+      const updatedProposalStr = { ...proposals.find(p => p.id === id) };
+      if (!updatedProposalStr.id) throw new Error('Proposta não encontrada');
 
-      // Parse Budget Data (Phase 2) - para detalhes e lotes
-      const budgetData = parseBudgetJson(text);
+      let hasUpdates = false;
+      let updates: any = {};
 
-      const proposal = proposals.find(p => p.id === id);
-      if (!proposal) throw new Error('Proposta não encontrada');
+      // 1. Tentar Parsear Props Gerais (Skill/Identificacao)
+      try {
+        const proposalUpdates = parseSkillJson(text);
+        updates = { ...updates, ...proposalUpdates };
+        hasUpdates = true;
+      } catch (e) { console.log('Skill parse skipped'); }
 
-      const updated = {
-        ...proposal,
-        ...proposalUpdates, // Aplica atualizações de nível raiz (custos, equipa, etc)
-        orcamento_detalhado: budgetData,
+      // 2. Tentar Parsear Decisão (Se houver chave 'decisao' ou 'motivos_recusa')
+      if (rawData.decisao || rawData.motivos_recusa) {
+        try {
+          const decisionData = parseDecisionJson(text);
+          updates.relatorio_decisao = decisionData;
+          if (decisionData.decisao.tipo === 'DECLINADO') updates.estado = EstadoProposta.NAO_ADJUDICADA;
+          else if (decisionData.decisao.tipo === 'ADJUDICADO') updates.estado = EstadoProposta.ADJUDICADA;
+          hasUpdates = true;
+        } catch (e) { console.warn('Decision parse failed:', e); }
+      }
+
+      // 3. Tentar Parsear Orçamento (Se houver chaves de orçamento)
+      if (rawData.orcamento || rawData.orcamento_detalhado || rawData.lotes || rawData.resumo_custos) {
+        try {
+          const budgetData = parseBudgetJson(text);
+          updates.orcamento_detalhado = budgetData;
+          hasUpdates = true;
+        } catch (e) { console.warn('Budget parse failed:', e); }
+      }
+
+      if (!hasUpdates) {
+        throw new Error('O ficheiro não contém dados reconhecidos (Orçamento ou Decisão).');
+      }
+
+      const finalProposal = {
+        ...updatedProposalStr,
+        ...updates,
         updated_at: new Date().toISOString()
       };
 
-      await saveProposal(updated);
-      setProposals(prev => prev.map(p => p.id === id ? updated : p));
+      await saveProposal(finalProposal as Proposta);
+      setProposals(prev => prev.map(p => p.id === id ? finalProposal as Proposta : p));
 
-      // Update selected if needed
       if (selectedProposal?.id === id) {
-        setSelectedProposal(updated);
+        setSelectedProposal(finalProposal as Proposta);
       }
     } catch (err: any) {
-      setError('Erro ao importar orçamento: ' + err.message);
+      setError('Erro ao importar: ' + err.message);
     } finally {
       setIsLoading(false);
     }
