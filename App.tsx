@@ -156,7 +156,7 @@ const App: React.FC = () => {
         try {
           const decisionData = parseDecisionJson(text);
           updates.relatorio_decisao = decisionData;
-          if (decisionData.decisao.tipo === 'DECLINADO') updates.estado = EstadoProposta.NAO_ADJUDICADA;
+          if (decisionData.decisao.tipo === 'DECLINADO') updates.estado = EstadoProposta.DECLINADA;
           else if (decisionData.decisao.tipo === 'ADJUDICADO') updates.estado = EstadoProposta.ADJUDICADA;
           hasUpdates = true;
         } catch (e) { console.warn('Decision parse failed:', e); }
