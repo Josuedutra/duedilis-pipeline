@@ -88,7 +88,7 @@ export const parseSkillJson = (jsonStr: string): Partial<Proposta> => {
         entidade_contratante: e.entidade_contratante || '',
         nif_entidade: e.nif_entidade || '',
         plataforma: (e.plataforma as Plataforma) || Plataforma.OUTROS,
-        local_execucao: e.local_execucao || '',
+        local_execucao: i.local_execucao || e.local_execucao || '',
 
         valor_base_edital: v.valor_base || 0,
         valor_obra: v.valor_obra,
@@ -199,9 +199,9 @@ export const parseBudgetJson = (jsonStr: string): OrcamentoDetalhado => {
             custos_indiretos_pct: rc.custos_indiretos_pct || 0,
             custos_indiretos_eur: rc.custos_indiretos_eur || rc.custos_indiretos || 0,
             base_custo_eur: custoReal,
-            gap_vs_preco_base_eur: 0,
-            gap_vs_preco_base_pct: 0,
-            viabilidade: 'VIAVEL'
+            gap_vs_preco_base_eur: totalEur - custoReal,
+            gap_vs_preco_base_pct: totalEur ? ((totalEur - custoReal) / totalEur) * 100 : 0,
+            viabilidade: (totalEur - custoReal) < 0 ? 'INVIAVEL' : 'VIAVEL'
           }
         ],
         total: {

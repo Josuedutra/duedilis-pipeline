@@ -385,14 +385,14 @@ const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onBack, onD
                               <td className="px-6 py-4 text-right font-medium text-slate-900">{formatCurrency(l.preco_base_eur)}</td>
                               <td className="px-6 py-4 text-right font-medium text-blue-600">{formatCurrency(l.base_custo_eur)}</td>
                               <td className={`px-6 py-4 text-center font-bold ${l.gap_vs_preco_base_pct < 0 ? 'text-red-500' : 'text-green-500'}`}>
-                                {l.gap_vs_preco_base_pct}%
+                                {l.gap_vs_preco_base_pct.toFixed(1)}%
                               </td>
                               <td className="px-6 py-4 text-center">
-                                <span className={`px-2 py-1 rounded-full text-[10px] uppercase font-black tracking-wide ${l.viabilidade === 'INVIAVEL' ? 'bg-red-100 text-red-700' :
+                                <span className={`px-2 py-1 rounded-full text-[10px] uppercase font-black tracking-wide ${l.gap_vs_preco_base_pct < 0 ? 'bg-red-100 text-red-700' :
                                   l.viabilidade === 'RISCO' ? 'bg-amber-100 text-amber-700' :
                                     'bg-green-100 text-green-700'
                                   }`}>
-                                  {l.viabilidade}
+                                  {l.gap_vs_preco_base_pct < 0 ? 'CRÍTICO' : l.viabilidade}
                                 </span>
                               </td>
                             </tr>
@@ -404,7 +404,7 @@ const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onBack, onD
                       <div className="bg-slate-900 text-white p-6 rounded-2xl">
                         <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Total Gap (Preço Base vs Custo)</p>
                         <p className={`text-3xl font-black ${currentProposal.orcamento_detalhado.total.gap_pct < 0 ? 'text-red-400' : 'text-green-400'}`}>
-                          {currentProposal.orcamento_detalhado.total.gap_pct}%
+                          {currentProposal.orcamento_detalhado.total.gap_pct.toFixed(1)}%
                         </p>
                         <p className="text-xs text-slate-400 mt-1 font-medium italic">
                           {formatCurrency(currentProposal.orcamento_detalhado.total.gap_eur)}
@@ -427,27 +427,9 @@ const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onBack, onD
                 </div>
               )}
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 bg-slate-900 p-10 rounded-[3rem] text-white shadow-2xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none"><DollarSign size={160} /></div>
-                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400 mb-8 flex items-center space-x-2">
-                    <Calculator size={14} />
-                    <span>Estrutura Financeira Consolidada</span>
-                  </h4>
+              </div>                 
+              )}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    <div className="space-y-6">
-                      <div className="flex justify-between items-baseline group">
-                        <span className="text-sm text-slate-400 font-bold group-hover:text-slate-300 transition-colors">Custos Mão de Obra (RH)</span>
-                        <span className="text-xl font-black">{formatCurrency(rhTotalCost)}</span>
-                      </div>
-                      <div className="flex justify-between items-baseline group">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-sm text-slate-400 font-bold group-hover:text-slate-300 transition-colors">Custos Diretos (Outros)</span>
-                          <span className="bg-blue-600/30 text-blue-300 text-[9px] px-1.5 py-0.5 rounded font-black">{directPercent}% RH</span>
-                        </div>
-                        <span className="text-xl font-black">{formatCurrency(otherDirectCostsCalculated)}</span>
-                      </div>
                       <div className="flex justify-between items-baseline group">
                         <div className="flex items-center space-x-2">
                           <span className="text-sm text-slate-400 font-bold group-hover:text-slate-300 transition-colors">Custos Indiretos</span>
@@ -522,81 +504,85 @@ const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onBack, onD
                     </p>
                   </div>
                 </div>
-              </div>
-            </div>
+              </div >
+            </div >
           )}
 
-          {activeTab === 'ai' && (
-            <div className="animate-in fade-in duration-500">
-              {aiResult ? (
-                <div className="space-y-8">
-                  {aiResult.financial_warning && (
-                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-center space-x-3 text-amber-800">
-                      <FileWarning size={20} className="shrink-0" />
-                      <p className="text-sm font-bold">{aiResult.financial_warning}</p>
-                    </div>
-                  )}
-                  <div className="p-8 bg-slate-900 rounded-[2.5rem] text-white">
-                    <h3 className="text-2xl font-black mb-4 flex items-center space-x-3 tracking-tight italic">
-                      <Sparkles className="text-blue-400" />
-                      <span>Análise IA</span>
-                    </h3>
-                    <p className="text-slate-300 leading-relaxed text-lg">{aiResult.summary}</p>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="bg-red-50 p-8 rounded-[2.5rem] border border-red-100">
-                      <h4 className="font-black text-red-800 uppercase text-xs mb-6 flex items-center space-x-2"><ShieldAlert size={16} /><span>Riscos</span></h4>
-                      <ul className="space-y-4">
-                        {aiResult.risks.map((r, i) => <li key={i} className="text-red-900 text-sm font-medium">• {r}</li>)}
-                      </ul>
-                    </div>
-                    <div className="bg-green-50 p-8 rounded-[2.5rem] border border-green-100">
-                      <h4 className="font-black text-green-800 uppercase text-xs mb-6 flex items-center space-x-2"><Target size={16} /><span>Pontos Fortes</span></h4>
-                      <ul className="space-y-4">
-                        {aiResult.strengths.map((s, i) => <li key={i} className="text-green-900 text-sm font-medium">• {s}</li>)}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-20">
-                  <button onClick={handleRunAI} className="px-8 py-3 bg-slate-900 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest">Analisar com IA</button>
-                </div>
-              )}
+{
+  activeTab === 'ai' && (
+    <div className="animate-in fade-in duration-500">
+      {aiResult ? (
+        <div className="space-y-8">
+          {aiResult.financial_warning && (
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-center space-x-3 text-amber-800">
+              <FileWarning size={20} className="shrink-0" />
+              <p className="text-sm font-bold">{aiResult.financial_warning}</p>
             </div>
           )}
-
-          {activeTab === 'docs' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-in fade-in duration-300">
-              {[
-                { name: 'Análise do Edital', type: 'pdf_analise', icon: FileText, desc: 'Análise técnica de requisitos.' },
-                { name: 'Cálculo de Orçamento', type: 'pdf_orcamento', icon: Briefcase, desc: 'Folha de cálculo Skill/Excel.' },
-                { name: 'Proposta Técnica', type: 'pdf_proposta', icon: CheckCircle2, desc: 'Ficheiro final submetido.' },
-                { name: 'Ata de Abertura', type: 'pdf_ata_abertura', icon: Gavel, desc: 'Documento público de concorrência.' },
-                { name: 'Relatório Final', type: 'pdf_relatorio_final', icon: FileCheck, desc: 'Relatório de adjudicação.' }
-              ].map((doc) => {
-                const fileUrl = (currentProposal as any)[doc.type];
-                return (
-                  <div key={doc.type} className={`p-8 rounded-[2.5rem] border transition-all relative overflow-hidden group ${fileUrl ? 'bg-slate-50 border-slate-200' : 'bg-slate-50/50 border-slate-100 border-dashed'}`}>
-                    <div className="flex items-start justify-between mb-8">
-                      <div className={`p-4 rounded-2xl ${fileUrl ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-400'}`}>
-                        <doc.icon size={28} />
-                      </div>
-                      {fileUrl && <a href={fileUrl} target="_blank" className="p-3 bg-white border border-slate-200 rounded-xl text-slate-600 hover:text-blue-600 transition-all"><ExternalLink size={18} /></a>}
-                    </div>
-                    <h4 className="font-black text-slate-900 text-lg mb-1">{doc.name}</h4>
-                    <p className="text-xs text-slate-500 mb-8">{doc.desc}</p>
-                    <button onClick={() => { setTargetDocType(doc.type); fileInputRef.current?.click(); }} className="w-full py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-black uppercase text-[10px] tracking-widest rounded-xl transition-all">
-                      {fileUrl ? 'Substituir PDF' : 'Carregar PDF'}
-                    </button>
-                  </div>
-                );
-              })}
+          <div className="p-8 bg-slate-900 rounded-[2.5rem] text-white">
+            <h3 className="text-2xl font-black mb-4 flex items-center space-x-3 tracking-tight italic">
+              <Sparkles className="text-blue-400" />
+              <span>Análise IA</span>
+            </h3>
+            <p className="text-slate-300 leading-relaxed text-lg">{aiResult.summary}</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-red-50 p-8 rounded-[2.5rem] border border-red-100">
+              <h4 className="font-black text-red-800 uppercase text-xs mb-6 flex items-center space-x-2"><ShieldAlert size={16} /><span>Riscos</span></h4>
+              <ul className="space-y-4">
+                {aiResult.risks.map((r, i) => <li key={i} className="text-red-900 text-sm font-medium">• {r}</li>)}
+              </ul>
             </div>
-          )}
+            <div className="bg-green-50 p-8 rounded-[2.5rem] border border-green-100">
+              <h4 className="font-black text-green-800 uppercase text-xs mb-6 flex items-center space-x-2"><Target size={16} /><span>Pontos Fortes</span></h4>
+              <ul className="space-y-4">
+                {aiResult.strengths.map((s, i) => <li key={i} className="text-green-900 text-sm font-medium">• {s}</li>)}
+              </ul>
+            </div>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="text-center py-20">
+          <button onClick={handleRunAI} className="px-8 py-3 bg-slate-900 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest">Analisar com IA</button>
+        </div>
+      )}
     </div>
+  )
+}
+
+{
+  activeTab === 'docs' && (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-in fade-in duration-300">
+      {[
+        { name: 'Análise do Edital', type: 'pdf_analise', icon: FileText, desc: 'Análise técnica de requisitos.' },
+        { name: 'Cálculo de Orçamento', type: 'pdf_orcamento', icon: Briefcase, desc: 'Folha de cálculo Skill/Excel.' },
+        { name: 'Proposta Técnica', type: 'pdf_proposta', icon: CheckCircle2, desc: 'Ficheiro final submetido.' },
+        { name: 'Ata de Abertura', type: 'pdf_ata_abertura', icon: Gavel, desc: 'Documento público de concorrência.' },
+        { name: 'Relatório Final', type: 'pdf_relatorio_final', icon: FileCheck, desc: 'Relatório de adjudicação.' }
+      ].map((doc) => {
+        const fileUrl = (currentProposal as any)[doc.type];
+        return (
+          <div key={doc.type} className={`p-8 rounded-[2.5rem] border transition-all relative overflow-hidden group ${fileUrl ? 'bg-slate-50 border-slate-200' : 'bg-slate-50/50 border-slate-100 border-dashed'}`}>
+            <div className="flex items-start justify-between mb-8">
+              <div className={`p-4 rounded-2xl ${fileUrl ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-400'}`}>
+                <doc.icon size={28} />
+              </div>
+              {fileUrl && <a href={fileUrl} target="_blank" className="p-3 bg-white border border-slate-200 rounded-xl text-slate-600 hover:text-blue-600 transition-all"><ExternalLink size={18} /></a>}
+            </div>
+            <h4 className="font-black text-slate-900 text-lg mb-1">{doc.name}</h4>
+            <p className="text-xs text-slate-500 mb-8">{doc.desc}</p>
+            <button onClick={() => { setTargetDocType(doc.type); fileInputRef.current?.click(); }} className="w-full py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-black uppercase text-[10px] tracking-widest rounded-xl transition-all">
+              {fileUrl ? 'Substituir PDF' : 'Carregar PDF'}
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  )
+}
+        </div >
+      </div >
+    </div >
   );
 };
 
