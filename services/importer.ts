@@ -140,7 +140,13 @@ export const parseBudgetJson = (jsonStr: string): OrcamentoDetalhado => {
     let root = Array.isArray(data) ? data[0] : data;
 
     // Tentar desenrolar wrappers comuns
-    if (root.orcamento_detalhado) {
+    if (root.orcamento) {
+      root = root.orcamento;
+      // Pode haver um orcamento_detalhado dentro de orcamento
+      if (root.orcamento_detalhado) {
+        root = root.orcamento_detalhado;
+      }
+    } else if (root.orcamento_detalhado) {
       root = root.orcamento_detalhado;
     } else if (root.data) { // Wrapper genérico
       root = root.data;
