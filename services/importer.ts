@@ -100,11 +100,22 @@ export const parseSkillJson = (jsonStr: string): Partial<Proposta> => {
         preco_peso_percentual: ca.preco_peso,
         qualidade_peso_percentual: ca.qualidade_peso,
 
-        equipa_resumo: re.map((m: any) => ({
-          cargo: m.cargo || m.funcao || 'Técnico',
-          dedicacao_percentual: m.dedicacao_percentual || m.dedicacao_pct || 0,
-          custo_mensal: m.custo_mensal || (m.custo_total_eur && m.meses ? m.custo_total_eur / m.meses : 0)
-        })),
+        equipa_resumo: re.map((m: any) => {
+          const dedication = m.dedicacao_percentual || m.dedicacao_pct || 0;
+          const effectiveMonthly = m.custo_mensal || (m.custo_total_eur && m.meses ? m.custo_total_eur / m.meses : 0);
+
+          // O UI espera o custo BASE (100% FTE), pois ele aplica a % novamente na visualização.
+          // Se calculado do total (que já considera a alocação), temos que reverter para chegar ao base.
+          const baseMonthly = (dedication > 0 && dedication < 100)
+            ? effectiveMonthly / (dedication / 100)
+            : effectiveMonthly;
+
+          return {
+            cargo: m.cargo || m.funcao || 'Técnico',
+            dedicacao_percentual: dedication,
+            custo_mensal: baseMonthly
+          };
+        }),
         num_tecnicos: re.length,
 
         observacoes: obsParts.join('\n\n')
