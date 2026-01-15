@@ -136,13 +136,21 @@ export const parseBudgetJson = (jsonStr: string): OrcamentoDetalhado => {
   try {
     const data = JSON.parse(jsonStr);
 
-    // Validação simples (Duck typing)
-    // O JSON de orçamento é um array com 1 objeto ou n objetos? 
-    // O exemplo mostra [{...}], então assumimos array.
-    const root = Array.isArray(data) ? data[0] : data;
+    const data = JSON.parse(jsonStr);
+
+    // Validação robusta
+    let root = Array.isArray(data) ? data[0] : data;
+
+    // Tentar desenrolar wrappers comuns
+    if (root.orcamento_detalhado) {
+      root = root.orcamento_detalhado;
+    } else if (root.data) { // Wrapper genérico
+      root = root.data;
+    }
 
     if (!root.lotes || !root.total) {
-      throw new Error("JSON de orçamento inválido: 'lotes' ou 'total' ausentes.");
+      console.error("Campos encontrados no JSON:", Object.keys(root));
+      throw new Error("JSON de orçamento inválido: Campos obrigatórios 'lotes' ou 'total' não encontrados na raiz ou em 'orcamento_detalhado'.");
     }
 
     // Mapear para garantir tipagem limpa (whitelist implícita)
