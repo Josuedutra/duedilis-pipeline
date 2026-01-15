@@ -4,10 +4,10 @@ import { Proposta, EstadoProposta, Plataforma, TipoServico, CriterioTipo } from 
 export const parseSkillJson = (jsonStr: string): Partial<Proposta> => {
   try {
     const data = JSON.parse(jsonStr);
-    
+
     // Detecção: Formato Aninhado (Skill/Antigo) vs Flat (Novo/Direto)
     const isNested = 'concurso' in data;
-    
+
     let base: Partial<Proposta> = {
       estado: EstadoProposta.PREPARACAO,
       tags: [],
@@ -53,7 +53,7 @@ export const parseSkillJson = (jsonStr: string): Partial<Proposta> => {
 
         base = {
           ...base,
-          custos_diretos_percentual: 5, 
+          custos_diretos_percentual: 5,
           custos_indiretos_percentual: o.custos_indiretos?.percentual || 12,
           margem_percentual: o.margem?.percentual || 15,
           valor_proposto: proposedValue,
@@ -62,15 +62,18 @@ export const parseSkillJson = (jsonStr: string): Partial<Proposta> => {
       }
     } else {
       // --- LÓGICA FLAT (NOVO) ---
-      // Mapeamento direto assumindo que as chaves correspondem à interface Proposta
+      // Mapeamento direto + normalização de chaves comuns
       base = {
         ...base,
         ...data,
-        // Garantir conversões/defaults seguros se necessário
+        // Garantir campos obrigatórios que podem ter nomes ligeiramente diferentes
+        referencia_concurso: data.referencia_concurso || data.referencia || '',
+        objeto: data.objeto || data.designacao || '',
+        entidade_contratante: data.entidade_contratante || data.entidade || '',
+
+        // Garantir arrays e números
         equipa_resumo: Array.isArray(data.equipa_resumo) ? data.equipa_resumo : [],
         num_tecnicos: typeof data.num_tecnicos === 'number' ? data.num_tecnicos : (Array.isArray(data.equipa_resumo) ? data.equipa_resumo.length : 0),
-        // Forçar enums se vierem como string simples? O cast 'as' cuida do TS, mas runtime depende do JSON.
-        // Assumindo que o JSON flat já vem limpo.
       };
     }
 
