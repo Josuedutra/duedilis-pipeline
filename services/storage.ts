@@ -36,6 +36,11 @@ export const saveProposal = async (proposal: Proposta): Promise<void> => {
     updated_at: new Date().toISOString()
   };
 
+  // Remover campo 'alertas' que pode vir do JSON mas não existe na BD
+  if ('alertas' in cleanProposal) {
+    delete (cleanProposal as any).alertas;
+  }
+
   const { error } = await supabase
     .from('propostas')
     .upsert(cleanProposal);
@@ -82,7 +87,7 @@ export const getRegionalFactors = async () => {
 export const uploadFile = async (proposalId: string, file: File, type: string): Promise<string> => {
   const fileExt = file.name.split('.').pop();
   const fileName = `${proposalId}/${type}_${Date.now()}.${fileExt}`;
-  
+
   const { error: uploadError } = await supabase.storage
     .from('documentos')
     .upload(fileName, file, {
