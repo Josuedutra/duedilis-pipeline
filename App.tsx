@@ -9,6 +9,7 @@ import ProposalForm from './components/ProposalForm';
 import KanbanBoard from './components/KanbanBoard';
 import { Proposta, EstadoProposta } from './types';
 import { getProposals, saveProposal, deleteProposal, getProposalById } from './services/storage';
+import { parseBudgetJson } from './services/importer';
 import { Loader2, ShieldAlert, Copy, Check, X } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -125,6 +126,35 @@ const App: React.FC = () => {
     }
   };
 
+  const handleImportBudget = async (id: string, file: File) => {
+    setIsLoading(true);
+    try {
+      const text = await file.text();
+      const budgetData = parseBudgetJson(text);
+
+      const proposal = proposals.find(p => p.id === id);
+      if (!proposal) throw new Error('Proposta não encontrada');
+
+      const updated = {
+        ...proposal,
+        orcamento_detalhado: budgetData,
+        updated_at: new Date().toISOString()
+      };
+
+      await saveProposal(updated);
+      setProposals(prev => prev.map(p => p.id === id ? updated : p));
+
+      // Update selected if needed
+      if (selectedProposal?.id === id) {
+        setSelectedProposal(updated);
+      }
+    } catch (err: any) {
+      setError('Erro ao importar orçamento: ' + err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const SQL_SCRIPT = `-- SCRIPT DE REPARAÇÃO DE BASE DE DADOS (DUEDILIS)
 ALTER TABLE propostas ADD COLUMN IF NOT EXISTS custos_diretos_percentual NUMERIC DEFAULT 5;
 ALTER TABLE propostas ADD COLUMN IF NOT EXISTS local_execucao TEXT;
@@ -188,6 +218,7 @@ NOTIFY pgrst, 'reload schema';`;
           proposals={proposals}
           onSelect={handleSelect}
           onImport={() => setIsImportModalOpen(true)}
+          onImportBudget={handleImportBudget}
           onNew={() => { setEditingProposal(null); setIsFormOpen(true); }}
           onDelete={setConfirmDeleteId}
         />

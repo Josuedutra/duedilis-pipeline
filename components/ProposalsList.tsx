@@ -1,20 +1,23 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Proposta, EstadoProposta } from '../types';
-import { Search, Plus, Filter, Eye, Edit2, Trash2, FileJson } from 'lucide-react';
+import { Search, Plus, Filter, Eye, Edit2, Trash2, FileJson, Database } from 'lucide-react';
 import { formatCurrency, ESTADO_LABELS, PLATAFORMA_LABELS, TIPO_SERVICO_LABELS } from '../constants';
 
 interface ProposalsListProps {
   proposals: Proposta[];
   onSelect: (id: string) => void;
   onImport: () => void;
+  onImportBudget: (id: string, file: File) => void;
   onNew: () => void;
   onDelete: (id: string) => void;
 }
 
-const ProposalsList: React.FC<ProposalsListProps> = ({ proposals, onSelect, onImport, onNew, onDelete }) => {
+const ProposalsList: React.FC<ProposalsListProps> = ({ proposals, onSelect, onImport, onImportBudget, onNew, onDelete }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFilter, setEstadoFilter] = useState<string>('todos');
+  const budgetInputRef = useRef<HTMLInputElement>(null);
+  const [activeProposalId, setActiveProposalId] = useState<string | null>(null);
 
   const filtered = proposals.filter(p => {
     const matchesSearch = p.referencia_concurso.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -24,8 +27,29 @@ const ProposalsList: React.FC<ProposalsListProps> = ({ proposals, onSelect, onIm
     return matchesSearch && matchesEstado;
   });
 
+  const handleBudgetFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && activeProposalId) {
+      onImportBudget(activeProposalId, file);
+      setActiveProposalId(null);
+    }
+  };
+
+  const triggerBudgetUpload = (id: string) => {
+    setActiveProposalId(id);
+    budgetInputRef.current?.click();
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
+      <input
+        type="file"
+        ref={budgetInputRef}
+        onChange={handleBudgetFileChange}
+        className="hidden"
+        accept=".json"
+      />
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Propostas</h1>
@@ -123,6 +147,13 @@ const ProposalsList: React.FC<ProposalsListProps> = ({ proposals, onSelect, onIm
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); triggerBudgetUpload(p.id); }}
+                          title="Importar Orçamento (JSON)"
+                          className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                        >
+                          <Database size={18} />
+                        </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); onSelect(p.id); }}
                           className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
