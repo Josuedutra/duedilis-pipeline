@@ -8,6 +8,7 @@ export const ESTADO_LABELS: Record<EstadoProposta, { label: string; color: strin
   [EstadoProposta.EM_ANALISE]: { label: 'Em Análise', color: 'bg-purple-100 text-purple-800' },
   [EstadoProposta.ADJUDICADA]: { label: 'Adjudicada', color: 'bg-green-100 text-green-800' },
   [EstadoProposta.NAO_ADJUDICADA]: { label: 'Não Adjudicada', color: 'bg-red-100 text-red-800' },
+  [EstadoProposta.DECLINADA]: { label: 'Declinada', color: 'bg-zinc-200 text-zinc-700' },
   [EstadoProposta.CANCELADA]: { label: 'Cancelada', color: 'bg-slate-100 text-slate-800' },
 };
 

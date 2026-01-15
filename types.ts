@@ -23,6 +23,7 @@ export enum EstadoProposta {
   EM_ANALISE = 'em_analise',
   ADJUDICADA = 'adjudicada',
   NAO_ADJUDICADA = 'nao_adjudicada',
+  DECLINADA = 'declinada',
   CANCELADA = 'cancelada'
 }
 

@@ -21,10 +21,11 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ proposals, onMoveProposal, on
     EstadoProposta.EM_ANALISE,
     EstadoProposta.ADJUDICADA,
     EstadoProposta.NAO_ADJUDICADA,
+    EstadoProposta.DECLINADA,
     EstadoProposta.CANCELADA
   ];
 
-  const getProposalsByState = (state: EstadoProposta) => 
+  const getProposalsByState = (state: EstadoProposta) =>
     proposals.filter(p => p.estado === state);
 
   const handleDragStart = (e: React.DragEvent, id: string) => {
@@ -62,14 +63,13 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ proposals, onMoveProposal, on
         {states.map((state) => {
           const columnProposals = getProposalsByState(state);
           const { label, color } = ESTADO_LABELS[state];
-          const isClosedState = state === EstadoProposta.ADJUDICADA || state === EstadoProposta.NAO_ADJUDICADA || state === EstadoProposta.CANCELADA;
-          
+          const isClosedState = state === EstadoProposta.ADJUDICADA || state === EstadoProposta.NAO_ADJUDICADA || state === EstadoProposta.DECLINADA || state === EstadoProposta.CANCELADA;
+
           return (
             <div
               key={state}
-              className={`w-72 flex flex-col rounded-[2.5rem] border p-5 transition-all shadow-sm ${
-                isClosedState ? 'bg-slate-50/70 border-slate-200/50' : 'bg-slate-100/40 border-slate-200/40'
-              }`}
+              className={`w-72 flex flex-col rounded-[2.5rem] border p-5 transition-all shadow-sm ${isClosedState ? 'bg-slate-50/70 border-slate-200/50' : 'bg-slate-100/40 border-slate-200/40'
+                }`}
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, state)}
             >
@@ -98,9 +98,8 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ proposals, onMoveProposal, on
                       onDragStart={(e) => handleDragStart(e, p.id)}
                       onDragEnd={handleDragEnd}
                       onClick={() => onSelect(p.id)}
-                      className={`bg-white p-5 rounded-[1.8rem] border shadow-sm hover:shadow-2xl hover:border-blue-400 hover:-translate-y-1 transition-all cursor-grab active:cursor-grabbing group relative overflow-hidden ${
-                        draggedId === p.id ? 'opacity-0' : 'opacity-100'
-                      } ${isWon ? 'border-green-200 bg-green-50/20' : isLost ? 'border-red-200 bg-red-50/20' : 'border-slate-100'}`}
+                      className={`bg-white p-5 rounded-[1.8rem] border shadow-sm hover:shadow-2xl hover:border-blue-400 hover:-translate-y-1 transition-all cursor-grab active:cursor-grabbing group relative overflow-hidden ${draggedId === p.id ? 'opacity-0' : 'opacity-100'
+                        } ${isWon ? 'border-green-200 bg-green-50/20' : isLost ? 'border-red-200 bg-red-50/20' : 'border-slate-100'}`}
                     >
                       {isUrgent && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-red-500"></div>}
                       {isWon && <CheckCircle2 className="absolute top-4 right-4 text-green-500/10" size={56} />}
@@ -109,7 +108,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ proposals, onMoveProposal, on
                       <div className="flex justify-between items-start mb-3 relative z-10">
                         <span className="text-[11px] font-black text-blue-600 tracking-tight">{p.referencia_concurso}</span>
                         <div className="flex items-center space-x-1">
-                          <button 
+                          <button
                             onClick={(e) => { e.stopPropagation(); onDelete(p.id); }}
                             className="p-1.5 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
                           >
@@ -128,13 +127,13 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ proposals, onMoveProposal, on
                           <Building2 size={13} className="mr-2 text-slate-400" />
                           <span className="truncate">{p.entidade_contratante}</span>
                         </div>
-                        
+
                         <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-50">
                           <div className="flex flex-col">
                             <span className="text-[9px] text-slate-400 uppercase font-black tracking-widest mb-0.5">Valor</span>
                             <span className="text-xs font-black text-slate-900">{formatCurrency(p.valor_proposto)}</span>
                           </div>
-                          
+
                           <div className={`flex flex-col items-end ${isUrgent ? 'text-red-600' : 'text-slate-500'}`}>
                             <div className="flex items-center space-x-1">
                               {isUrgent ? <AlertCircle size={12} /> : <Clock size={12} />}
@@ -158,7 +157,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ proposals, onMoveProposal, on
           );
         })}
       </div>
-      
+
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           height: 8px;
