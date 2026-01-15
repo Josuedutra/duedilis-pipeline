@@ -1,0 +1,6 @@
+{
+  "name": "Duedilis Pipeline Manager",
+  "description": "Gestão de propostas CCP com Inteligência Artificial Gemini.",
+  "version": "1.0.0",
+  "requestFramePermissions": []
+}
