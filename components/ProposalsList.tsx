@@ -177,17 +177,10 @@ const ProposalsList: React.FC<ProposalsListProps> = ({ proposals, onSelect, onIm
                           <ClipboardList size={18} />
                         </button>
                         <button
-                          onClick={(e) => { e.stopPropagation(); triggerBudgetUpload(p.id); }}
-                          title="Importar Orçamento (JSON)"
-                          className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                        >
-                          <Database size={18} />
-                        </button>
-                        <button
                           onClick={(e) => { e.stopPropagation(); onSelect(p.id); }}
                           className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         >
-                          <Eye size={18} />
+                          <Edit2 size={18} />
                         </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); onDelete(p.id); }}

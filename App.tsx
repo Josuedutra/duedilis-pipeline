@@ -265,6 +265,7 @@ NOTIFY pgrst, 'reload schema';`;
           onBack={() => setCurrentPage('propostas')}
           onDelete={setConfirmDeleteId}
           onEdit={() => { setEditingProposal(selectedProposal); setIsFormOpen(true); }}
+          onImportBudget={handleImportBudget}
         />
       )}
 

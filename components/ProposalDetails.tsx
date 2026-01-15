@@ -18,9 +18,10 @@ interface ProposalDetailsProps {
   onBack: () => void;
   onDelete: (id: string) => void;
   onEdit: () => void;
+  onImportBudget: (id: string, file: File) => void;
 }
 
-const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onBack, onDelete, onEdit }) => {
+const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onBack, onDelete, onEdit, onImportBudget }) => {
   const [activeTab, setActiveTab] = useState<'info' | 'timeline' | 'docs' | 'finance' | 'ai'>('info');
   const [currentProposal, setCurrentProposal] = useState<Proposta>(proposal);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -113,27 +114,15 @@ const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onBack, onD
     }
   };
 
-  const handleBudgetUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleBudgetUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
-    try {
-      const text = await file.text();
-      const budgetData = parseBudgetJson(text);
+    // Delegar para o App.tsx via prop
+    onImportBudget(currentProposal.id, file);
 
-      const updatedProposal = {
-        ...currentProposal,
-        orcamento_detalhado: budgetData,
-        updated_at: new Date().toISOString()
-      };
-
-      await saveProposal(updatedProposal);
-      setCurrentProposal(updatedProposal);
-      alert('Orçamento (Fase 2) importado com sucesso!');
-      setActiveTab('finance');
-    } catch (err: any) {
-      alert('Erro ao importar orçamento: ' + err.message);
-    }
+    // Limpar input
+    if (budgetInputRef.current) budgetInputRef.current.value = '';
   };
 
   const handleRunAI = async () => {
