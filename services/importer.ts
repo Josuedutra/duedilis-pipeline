@@ -136,8 +136,6 @@ export const parseBudgetJson = (jsonStr: string): OrcamentoDetalhado => {
   try {
     const data = JSON.parse(jsonStr);
 
-    const data = JSON.parse(jsonStr);
-
     // Validação robusta
     let root = Array.isArray(data) ? data[0] : data;
 
