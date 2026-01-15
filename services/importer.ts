@@ -66,7 +66,9 @@ export const parseSkillJson = (jsonStr: string): Partial<Proposta> => {
       const e = data.entidade || {};
       const v = data.valores_prazos || {};
       const ca = data.criterio_adjudicacao || {};
-      const re = data.requisitos_equipe || [];
+
+      // Fallback para equipa: requisitos_equipe OU custos_diretos_equipa.detalhe
+      const re = data.requisitos_equipe || data.custos_diretos_equipa?.detalhe || [];
       const alerts = data.alertas || [];
       const recs = data.recomendacoes || [];
       const notes = data.notas || '';
@@ -90,7 +92,7 @@ export const parseSkillJson = (jsonStr: string): Partial<Proposta> => {
 
         valor_base_edital: v.valor_base || 0,
         valor_obra: v.valor_obra,
-        data_limite_submissao: v.data_limite_proposta || '',
+        data_limite_submissao: v.data_limite_proposta || undefined,
         prazo_execucao_meses: v.duracao_meses || 0,
         prazo_obra_meses: v.prazo_obra_meses,
 
@@ -99,9 +101,9 @@ export const parseSkillJson = (jsonStr: string): Partial<Proposta> => {
         qualidade_peso_percentual: ca.qualidade_peso,
 
         equipa_resumo: re.map((m: any) => ({
-          cargo: m.cargo,
-          dedicacao_percentual: m.dedicacao_percentual,
-          custo_mensal: 0
+          cargo: m.cargo || m.funcao || 'Técnico',
+          dedicacao_percentual: m.dedicacao_percentual || m.dedicacao_pct || 0,
+          custo_mensal: m.custo_mensal || (m.custo_total_eur && m.meses ? m.custo_total_eur / m.meses : 0)
         })),
         num_tecnicos: re.length,
 
