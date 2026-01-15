@@ -36,14 +36,30 @@ export const saveProposal = async (proposal: Proposta): Promise<void> => {
     updated_at: new Date().toISOString()
   };
 
-  // Remover campo 'alertas' que pode vir do JSON mas não existe na BD
-  if ('alertas' in cleanProposal) {
-    delete (cleanProposal as any).alertas;
-  }
+  // Whitelist de campos permitidos na BD (baseado em Types.ts)
+  const VALID_KEYS = [
+    'id', 'referencia_concurso', 'objeto', 'entidade_contratante', 'nif_entidade', 'plataforma',
+    'tipo_servico', 'local_execucao', 'valor_base_edital', 'valor_obra', 'valor_proposto',
+    'custos_diretos', 'custos_diretos_percentual', 'custos_indiretos_percentual', 'margem_percentual',
+    'competitividade_percentual', 'data_limite_submissao', 'data_submissao_real',
+    'data_abertura_propostas', 'data_adjudicacao', 'prazo_execucao_meses', 'prazo_obra_meses',
+    'equipa_resumo', 'num_tecnicos', 'criterio_tipo', 'preco_peso_percentual',
+    'qualidade_peso_percentual', 'estado', 'valor_adjudicado', 'entidade_adjud_nome',
+    'nosso_ranking', 'num_concorrentes', 'desvio_percentual', 'pdf_analise', 'pdf_orcamento',
+    'pdf_proposta', 'pdf_ata_abertura', 'pdf_relatorio_final', 'tags', 'observacoes',
+    'alerta_prazo', 'created_at', 'updated_at', 'created_by'
+  ];
+
+  const sanitizedProposal: any = {};
+  Object.keys(cleanProposal).forEach(key => {
+    if (VALID_KEYS.includes(key)) {
+      sanitizedProposal[key] = (cleanProposal as any)[key];
+    }
+  });
 
   const { error } = await supabase
     .from('propostas')
-    .upsert(cleanProposal);
+    .upsert(sanitizedProposal);
 
   if (error) throw new Error(error.message);
 };
