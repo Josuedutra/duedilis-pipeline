@@ -6,7 +6,7 @@ import {
   DollarSign, Users, Clock, FileText, CheckCircle2,
   ExternalLink, Loader2, Gavel, FileCheck,
   Sparkles, ShieldAlert, Target, FileWarning, TrendingDown,
-  BarChart3, Calculator, Info, UploadCloud
+  BarChart3, Calculator, Info, UploadCloud, CheckCircle, AlertTriangle, ClipboardList
 } from 'lucide-react';
 import { formatCurrency, ESTADO_LABELS } from '../constants';
 import { uploadFile, saveProposal, getRhCosts, getRegionalFactors } from '../services/storage';
@@ -293,8 +293,8 @@ const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onBack, onD
                               </td>
                               <td className="px-6 py-4 text-center">
                                 <span className={`px-2 py-1 rounded-full text-[10px] uppercase font-black tracking-wide ${l.viabilidade === 'INVIAVEL' ? 'bg-red-100 text-red-700' :
-                                    l.viabilidade === 'RISCO' ? 'bg-amber-100 text-amber-700' :
-                                      'bg-green-100 text-green-700'
+                                  l.viabilidade === 'RISCO' ? 'bg-amber-100 text-amber-700' :
+                                    'bg-green-100 text-green-700'
                                   }`}>
                                   {l.viabilidade}
                                 </span>

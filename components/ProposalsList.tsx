@@ -1,7 +1,7 @@
 
 import React, { useState, useRef } from 'react';
 import { Proposta, EstadoProposta } from '../types';
-import { Search, Plus, Filter, Eye, Edit2, Trash2, FileJson, Database } from 'lucide-react';
+import { Search, Plus, Filter, Eye, Edit2, Trash2, FileJson, Database, ClipboardList } from 'lucide-react';
 import { formatCurrency, ESTADO_LABELS, PLATAFORMA_LABELS, TIPO_SERVICO_LABELS } from '../constants';
 
 interface ProposalsListProps {
@@ -9,14 +9,16 @@ interface ProposalsListProps {
   onSelect: (id: string) => void;
   onImport: () => void;
   onImportBudget: (id: string, file: File) => void;
+  onImportDecision: (id: string, file: File) => void;
   onNew: () => void;
   onDelete: (id: string) => void;
 }
 
-const ProposalsList: React.FC<ProposalsListProps> = ({ proposals, onSelect, onImport, onImportBudget, onNew, onDelete }) => {
+const ProposalsList: React.FC<ProposalsListProps> = ({ proposals, onSelect, onImport, onImportBudget, onImportDecision, onNew, onDelete }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFilter, setEstadoFilter] = useState<string>('todos');
   const budgetInputRef = useRef<HTMLInputElement>(null);
+  const decisionInputRef = useRef<HTMLInputElement>(null);
   const [activeProposalId, setActiveProposalId] = useState<string | null>(null);
 
   const filtered = proposals.filter(p => {
@@ -35,9 +37,22 @@ const ProposalsList: React.FC<ProposalsListProps> = ({ proposals, onSelect, onIm
     }
   };
 
+  const handleDecisionFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && activeProposalId) {
+      onImportDecision(activeProposalId, file);
+      setActiveProposalId(null);
+    }
+  };
+
   const triggerBudgetUpload = (id: string) => {
     setActiveProposalId(id);
     budgetInputRef.current?.click();
+  };
+
+  const triggerDecisionUpload = (id: string) => {
+    setActiveProposalId(id);
+    decisionInputRef.current?.click();
   };
 
   return (
@@ -46,6 +61,13 @@ const ProposalsList: React.FC<ProposalsListProps> = ({ proposals, onSelect, onIm
         type="file"
         ref={budgetInputRef}
         onChange={handleBudgetFileChange}
+        className="hidden"
+        accept=".json"
+      />
+      <input
+        type="file"
+        ref={decisionInputRef}
+        onChange={handleDecisionFileChange}
         className="hidden"
         accept=".json"
       />
@@ -147,6 +169,13 @@ const ProposalsList: React.FC<ProposalsListProps> = ({ proposals, onSelect, onIm
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); triggerDecisionUpload(p.id); }}
+                          title="Importar Decisão/Relatório (JSON)"
+                          className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                        >
+                          <ClipboardList size={18} />
+                        </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); triggerBudgetUpload(p.id); }}
                           title="Importar Orçamento (JSON)"

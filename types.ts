@@ -91,8 +91,68 @@ export interface Proposta {
   updated_at: string;
   created_by: string;
 
-  // Phase 2: Budget Details
+// --- FASE 3: RELATÓRIO DE DECISÃO ---
+export interface DecisaoInfo {
+  tipo: string;
+  data_decisao: string;
+  decidido_por: string;
+}
+
+export interface AnaliseRealizada {
+  fase_1: boolean;
+  fase_2: boolean;
+  fase_3: boolean;
+  cenario_analisado: string;
+  custo_real_estimado_eur: number;
+  gap_vs_preco_base_eur: number;
+  gap_vs_preco_base_pct: number;
+}
+
+export interface RelatorioDecisao {
+  decisao: DecisaoInfo;
+  motivos_recusa?: string[];
+  licoes_aprendidas?: string[];
+  proximos_passos?: string;
+  analise_realizada?: AnaliseRealizada;
+}
+
+export interface Proposta {
+  id: string;
+  referencia_concurso: string;
+  objeto: string;
+  entidade_contratante: string;
+  nif_entidade: string;
+  plataforma: Plataforma;
+  tipo_servico: TipoServico;
+  local_execucao: string;
+  valor_base_edital: number;
+  valor_obra?: number;
+  prazo_execucao_meses: number;
+  prazo_obra_meses?: number;
+  data_limite_submissao: string;
+  criterio_tipo: CriterioTipo;
+  preco_peso_percentual?: number;
+  qualidade_peso_percentual?: number;
+  equipa_resumo?: EquipaMembro[];
+  num_tecnicos?: number;
+  custos_diretos_percentual?: number;
+  custos_indiretos_percentual?: number;
+  margem_percentual?: number;
+  valor_proposto?: number;
+  competitividade_percentual?: number;
+  estado: EstadoProposta;
+  tags: string[];
+  observacoes: string;
+  pdf_analise?: string;
+  pdf_orcamento?: string;
+  pdf_proposta?: string;
+  pdf_ata_abertura?: string;
+  pdf_relatorio_final?: string;
   orcamento_detalhado?: OrcamentoDetalhado;
+  relatorio_decisao?: RelatorioDecisao;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Lote {

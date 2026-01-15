@@ -9,7 +9,7 @@ import ProposalForm from './components/ProposalForm';
 import KanbanBoard from './components/KanbanBoard';
 import { Proposta, EstadoProposta } from './types';
 import { getProposals, saveProposal, deleteProposal, getProposalById } from './services/storage';
-import { parseBudgetJson } from './services/importer';
+import { parseBudgetJson, parseDecisionJson } from './services/importer';
 import { Loader2, ShieldAlert, Copy, Check, X } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -155,6 +155,38 @@ const App: React.FC = () => {
     }
   };
 
+  const handleImportDecision = async (id: string, file: File) => {
+    setIsLoading(true);
+    try {
+      const text = await file.text();
+      const decisionData = parseDecisionJson(text);
+
+      const proposal = proposals.find(p => p.id === id);
+      if (!proposal) throw new Error('Proposta não encontrada');
+
+      // Mapear estado do JSON para Enum se possível
+      let novoEstado = proposal.estado;
+      if (decisionData.decisao.tipo === 'DECLINADO') novoEstado = EstadoProposta.NAO_ADJUDICADA;
+      else if (decisionData.decisao.tipo === 'ADJUDICADO') novoEstado = EstadoProposta.ADJUDICADA;
+
+      const updated = {
+        ...proposal,
+        relatorio_decisao: decisionData,
+        estado: novoEstado,
+        updated_at: new Date().toISOString()
+      };
+
+      await saveProposal(updated);
+      setProposals(prev => prev.map(p => p.id === id ? updated : p));
+
+      if (selectedProposal?.id === id) setSelectedProposal(updated);
+    } catch (err: any) {
+      setError('Erro ao importar decisão: ' + err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const SQL_SCRIPT = `-- SCRIPT DE REPARAÇÃO DE BASE DE DADOS (DUEDILIS)
 ALTER TABLE propostas ADD COLUMN IF NOT EXISTS custos_diretos_percentual NUMERIC DEFAULT 5;
 ALTER TABLE propostas ADD COLUMN IF NOT EXISTS local_execucao TEXT;
@@ -219,6 +251,7 @@ NOTIFY pgrst, 'reload schema';`;
           onSelect={handleSelect}
           onImport={() => setIsImportModalOpen(true)}
           onImportBudget={handleImportBudget}
+          onImportDecision={handleImportDecision}
           onNew={() => { setEditingProposal(null); setIsFormOpen(true); }}
           onDelete={setConfirmDeleteId}
         />

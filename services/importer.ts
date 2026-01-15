@@ -1,5 +1,5 @@
 
-import { Proposta, EstadoProposta, Plataforma, TipoServico, CriterioTipo, OrcamentoDetalhado } from '../types';
+import { Proposta, EstadoProposta, Plataforma, TipoServico, CriterioTipo, OrcamentoDetalhado, RelatorioDecisao } from '../types';
 
 export const parseSkillJson = (jsonStr: string): Partial<Proposta> => {
   try {
@@ -178,9 +178,51 @@ export const parseBudgetJson = (jsonStr: string): OrcamentoDetalhado => {
       recomendacao: root.recomendacao,
       alertas: root.alertas
     };
-
     return orcamento;
   } catch (e) {
     throw new Error('Erro ao ler JSON de Orçamento: ' + (e as Error).message);
+  }
+};
+
+// --- FASE 3: RELATÓRIO DE DECISÃO ---
+
+export const parseDecisionJson = (jsonStr: string): RelatorioDecisao => {
+  try {
+    const data = JSON.parse(jsonStr);
+
+    // Suporte a Array (exemplo do user) ou Objeto único
+    let root = Array.isArray(data) ? data[0] : data;
+
+    // Suporte a wrappers
+    if (root.relatorio_decisao) root = root.relatorio_decisao;
+    else if (root.data) root = root.data;
+
+    if (!root.decisao) {
+      throw new Error("JSON Inválido: Objeto 'decisao' não encontrado.");
+    }
+
+    const relatorio: RelatorioDecisao = {
+      decisao: {
+        tipo: root.decisao.tipo || 'DESCONHECIDO',
+        data_decisao: root.decisao.data_decisao || new Date().toISOString(),
+        decidido_por: root.decisao.decidido_por || 'Sistema'
+      },
+      motivos_recusa: root.motivos_recusa || [],
+      licoes_aprendidas: root.licoes_aprendidas || [],
+      proximos_passos: root.proximos_passos || '',
+      analise_realizada: root.analise_realizada ? {
+        fase_1: !!root.analise_realizada.fase_1,
+        fase_2: !!root.analise_realizada.fase_2,
+        fase_3: !!root.analise_realizada.fase_3,
+        cenario_analisado: root.analise_realizada.cenario_analisado || '',
+        custo_real_estimado_eur: root.analise_realizada.custo_real_estimado_eur || 0,
+        gap_vs_preco_base_eur: root.analise_realizada.gap_vs_preco_base_eur || 0,
+        gap_vs_preco_base_pct: root.analise_realizada.gap_vs_preco_base_pct || 0
+      } : undefined
+    };
+
+    return relatorio;
+  } catch (e) {
+    throw new Error('Erro ao ler JSON de Decisão: ' + (e as Error).message);
   }
 };
