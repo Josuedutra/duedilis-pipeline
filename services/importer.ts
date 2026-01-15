@@ -1,5 +1,5 @@
 
-import { Proposta, EstadoProposta, Plataforma, TipoServico, CriterioTipo } from '../types';
+import { Proposta, EstadoProposta, Plataforma, TipoServico, CriterioTipo, OrcamentoDetalhado } from '../types';
 
 export const parseSkillJson = (jsonStr: string): Partial<Proposta> => {
   try {
@@ -127,5 +127,54 @@ export const parseSkillJson = (jsonStr: string): Partial<Proposta> => {
     return base;
   } catch (e) {
     throw new Error('Formato JSON inválido.');
+  }
+};
+
+// --- NOVA FUNÇÃO: Parse Orçamento (Fase 2) ---
+
+export const parseBudgetJson = (jsonStr: string): OrcamentoDetalhado => {
+  try {
+    const data = JSON.parse(jsonStr);
+
+    // Validação simples (Duck typing)
+    // O JSON de orçamento é um array com 1 objeto ou n objetos? 
+    // O exemplo mostra [{...}], então assumimos array.
+    const root = Array.isArray(data) ? data[0] : data;
+
+    if (!root.lotes || !root.total) {
+      throw new Error("JSON de orçamento inválido: 'lotes' ou 'total' ausentes.");
+    }
+
+    // Mapear para garantir tipagem limpa (whitelist implícita)
+    const orcamento: OrcamentoDetalhado = {
+      fase: root.fase || 2,
+      data_calculo: root.data_calculo || new Date().toISOString().split('T')[0],
+      lotes: (root.lotes || []).map((l: any) => ({
+        lote: l.lote,
+        descricao: l.descricao,
+        preco_base_eur: l.preco_base_eur,
+        custos_diretos_equipa_eur: l.custos_diretos_equipa_eur,
+        outros_custos_diretos_eur: l.outros_custos_diretos_eur,
+        total_custos_diretos_eur: l.total_custos_diretos_eur,
+        custos_indiretos_pct: l.custos_indiretos_pct,
+        custos_indiretos_eur: l.custos_indiretos_eur,
+        base_custo_eur: l.base_custo_eur,
+        gap_vs_preco_base_eur: l.gap_vs_preco_base_eur,
+        gap_vs_preco_base_pct: l.gap_vs_preco_base_pct,
+        viabilidade: l.viabilidade
+      })),
+      total: {
+        preco_base_eur: root.total.preco_base_eur,
+        custo_real_eur: root.total.custo_real_eur,
+        gap_eur: root.total.gap_eur,
+        gap_pct: root.total.gap_pct
+      },
+      recomendacao: root.recomendacao,
+      alertas: root.alertas
+    };
+
+    return orcamento;
+  } catch (e) {
+    throw new Error('Erro ao ler JSON de Orçamento: ' + (e as Error).message);
   }
 };

@@ -46,7 +46,7 @@ export interface Proposta {
   plataforma: Plataforma;
   tipo_servico: TipoServico;
   local_execucao: string;
-  
+
   valor_base_edital: number;
   valor_obra?: number;
   valor_proposto: number;
@@ -90,4 +90,38 @@ export interface Proposta {
   created_at: string;
   updated_at: string;
   created_by: string;
+
+  // Phase 2: Budget Details
+  orcamento_detalhado?: OrcamentoDetalhado;
+}
+
+export interface Lote {
+  lote: string;
+  descricao: string;
+  preco_base_eur: number;
+  custos_diretos_equipa_eur: number;
+  outros_custos_diretos_eur: number;
+  total_custos_diretos_eur: number;
+  custos_indiretos_pct: number;
+  custos_indiretos_eur: number;
+  base_custo_eur: number;
+  gap_vs_preco_base_eur: number;
+  gap_vs_preco_base_pct: number;
+  viabilidade: 'VIAVEL' | 'INVIAVEL' | 'RISCO';
+}
+
+export interface OrcamentoTotal {
+  preco_base_eur: number;
+  custo_real_eur: number;
+  gap_eur: number;
+  gap_pct: number;
+}
+
+export interface OrcamentoDetalhado {
+  fase: number;
+  data_calculo: string;
+  lotes: Lote[];
+  total: OrcamentoTotal;
+  recomendacao?: string;
+  alertas?: string[];
 }
