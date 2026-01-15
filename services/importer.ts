@@ -21,20 +21,30 @@ export const parseSkillJson = (jsonStr: string): Partial<Proposta> => {
       // --- LÓGICA ANINHADA (LEGADO) ---
       if (data.concurso) {
         const c = data.concurso;
+
+        // Helper para extrair entidade (pode ser string ou objeto em schemas diferentes)
+        let entidade = '';
+        if (typeof c.entidade === 'string') entidade = c.entidade;
+        else if (c.entidade?.nome) entidade = c.entidade.nome;
+        else if (c.entidade_contratante) entidade = c.entidade_contratante;
+
+        // Helper para valor base
+        const valorBase = c.valores?.preco_base_sem_iva || c.preco_base_total_eur || c.preco_base_eur || 0;
+
         base = {
           ...base,
           referencia_concurso: c.referencia || '',
-          objeto: c.objeto || '',
-          entidade_contratante: c.entidade?.nome || '',
-          nif_entidade: c.entidade?.nif || '',
+          objeto: c.objeto || c.designacao || '', // 'designacao' é usado em reports de decisão
+          entidade_contratante: entidade,
+          nif_entidade: c.entidade?.nif || c.nif_entidade || '',
           plataforma: (c.plataforma as Plataforma) || Plataforma.OUTROS,
           tipo_servico: (c.tipo_servico as TipoServico) || TipoServico.FISCALIZACAO,
           local_execucao: c.local_execucao || '',
-          valor_base_edital: c.valores?.preco_base_sem_iva || 0,
+          valor_base_edital: valorBase,
           valor_obra: c.valores?.valor_obra,
           prazo_execucao_meses: c.prazos?.duracao_fiscalizacao_meses || 0,
           prazo_obra_meses: c.prazos?.prazo_obra_meses,
-          data_limite_submissao: c.prazos?.data_limite_proposta || '',
+          data_limite_submissao: c.prazos?.data_limite_proposta || c.data_limite_proposta || '',
           criterio_tipo: (c.criterio?.tipo as CriterioTipo) || CriterioTipo.MONOFATOR,
           preco_peso_percentual: c.criterio?.preco_peso,
           qualidade_peso_percentual: c.criterio?.qualidade_peso,
