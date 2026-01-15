@@ -140,15 +140,20 @@ export const parseBudgetJson = (jsonStr: string): OrcamentoDetalhado => {
     let root = Array.isArray(data) ? data[0] : data;
 
     // Tentar desenrolar wrappers comuns
-    if (root.orcamento) {
+    // Tentar desenrolar wrappers comuns
+    // Prioridade 1: Wrapper explícito de detalhe
+    if (root.orcamento_detalhado) {
+      root = root.orcamento_detalhado;
+    }
+    // Prioridade 2: 'orcamento' SÓ SE contiver estrutura detalhada (evita confundir com propriedade simples)
+    else if (root.orcamento && (root.orcamento.lotes || root.orcamento.orcamento_detalhado)) {
       root = root.orcamento;
-      // Pode haver um orcamento_detalhado dentro de orcamento
       if (root.orcamento_detalhado) {
         root = root.orcamento_detalhado;
       }
-    } else if (root.orcamento_detalhado) {
-      root = root.orcamento_detalhado;
-    } else if (root.data) { // Wrapper genérico
+    }
+    // Prioridade 3: Wrapper genérico 'data'
+    else if (root.data) {
       root = root.data;
     }
 
