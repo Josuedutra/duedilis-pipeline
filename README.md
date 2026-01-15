@@ -17,7 +17,14 @@ Plataforma avançada de gestão de pipeline de propostas para concursos público
 4. O deploy será feito automaticamente.
 
 ## 📊 Estrutura de Dados
-A aplicação espera uma tabela `propostas` no Supabase. Caso encontre erros de sincronização, utilize o script SQL de reparação disponível no aviso vermelho dentro da própria aplicação.
+A aplicação espera uma tabela `propostas` no Supabase. Caso encontre erros de sincronização ou veja o aviso vermelho na aplicação, execute o seguinte script no SQL Editor do Supabase:
+
+```sql
+-- SCRIPT DE REPARAÇÃO DE BASE DE DADOS
+ALTER TABLE propostas ADD COLUMN IF NOT EXISTS custos_diretos_percentual NUMERIC DEFAULT 5;
+ALTER TABLE propostas ADD COLUMN IF NOT EXISTS local_execucao TEXT;
+NOTIFY pgrst, 'reload schema';
+```
 
 ---
 Desenvolvido por Duedilis.
