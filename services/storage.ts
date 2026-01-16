@@ -48,7 +48,8 @@ export const saveProposal = async (proposal: Proposta): Promise<void> => {
     'nosso_ranking', 'num_concorrentes', 'desvio_percentual', 'pdf_analise', 'pdf_orcamento',
     'pdf_proposta', 'pdf_ata_abertura', 'pdf_relatorio_final', 'tags', 'observacoes',
     'alerta_prazo', 'created_at', 'updated_at', 'created_by',
-    'orcamento_detalhado', 'relatorio_decisao'
+    'orcamento_detalhado', 'relatorio_decisao',
+    'cenario_usado', 'otimizacoes_aplicadas', 'requisitos_validar', 'dependencia_lote', 'orcamento'
   ];
 
   const sanitizedProposal: any = {};

@@ -36,6 +36,9 @@ export interface EquipaMembro {
   cargo: string;
   dedicacao_percentual: number;
   custo_mensal?: number;
+  qtd?: number;
+  partilhado?: boolean;
+  nota?: string;
 }
 
 
@@ -63,6 +66,22 @@ export interface RelatorioDecisao {
   licoes_aprendidas?: string[];
   proximos_passos?: string;
   analise_realizada?: AnaliseRealizada;
+}
+
+export interface OrcamentoCustos {
+  [key: string]: number | undefined;
+  subtotal?: number;
+}
+
+export interface OrcamentoSimples {
+  custos_exclusivos: OrcamentoCustos;
+  custos_partilhados: OrcamentoCustos & { proporcao_percentual?: number };
+  custos_diretos_total: number;
+  custos_indiretos_percentual: number;
+  custos_indiretos_valor: number;
+  base_calculo: number;
+  margem_percentual: number;
+  margem_valor: number;
 }
 
 export interface Proposta {
@@ -102,6 +121,13 @@ export interface Proposta {
   created_by: string;
   created_at: string;
   updated_at: string;
+  // Campos novos do JSON
+  cenario_usado?: string;
+  otimizacoes_aplicadas?: string[];
+  requisitos_validar?: string[];
+  dependencia_lote?: string;
+  alerta_prazo?: boolean;
+  orcamento?: OrcamentoSimples;
 }
 
 export interface Lote {

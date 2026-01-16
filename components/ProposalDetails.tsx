@@ -268,6 +268,8 @@ const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onBack, onD
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 animate-in fade-in duration-300">
+
+              {/* LEFT COLUMN: Equipa & Dependências */}
               <div className="space-y-6">
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center space-x-2"><Users size={16} /><span>Equipa Técnica</span></h3>
                 <div className="space-y-3">
@@ -277,72 +279,152 @@ const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onBack, onD
                     const allocatedMonthly = baseCost * (alloc / 100);
 
                     return (
-                      <div key={i} className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-blue-200 transition-all">
+                      <div key={i} className="flex justify-between items-start p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-blue-200 transition-all relative overflow-hidden">
+                        {m.partilhado && (
+                          <div className="absolute top-0 right-0 bg-purple-100 text-purple-700 text-[9px] font-black uppercase px-2 py-0.5 rounded-bl-xl">
+                            Partilhado
+                          </div>
+                        )}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-bold text-slate-800 truncate">{m.cargo}</p>
+                          <p className="text-sm font-bold text-slate-800 truncate" title={m.cargo}>{m.cargo}</p>
                           <div className="flex items-center space-x-2 mt-1">
                             <span className="bg-blue-100 text-blue-700 text-[9px] px-1.5 py-0.5 rounded-md font-black">{alloc}% Aloc.</span>
-                            <span className="text-[10px] text-slate-400 font-medium">
-                              {formatCurrency(baseCost)} x {alloc}%
-                            </span>
+                            {m.qtd && m.qtd > 1 && <span className="text-[9px] text-slate-500 font-bold">x{m.qtd}</span>}
                           </div>
+                          {m.nota && <p className="text-[10px] text-slate-400 mt-1.5 italic">"{m.nota}"</p>}
                         </div>
-                        <div className="text-right ml-4">
+                        <div className="text-right ml-4 pt-1">
                           <p className="font-black text-sm text-slate-900">{formatCurrency(allocatedMonthly)}</p>
-                          <p className="text-[9px] text-slate-400 uppercase font-bold tracking-tight">/ mês efetivo</p>
+                          <p className="text-[9px] text-slate-400 uppercase font-bold tracking-tight">/ mês</p>
                         </div>
                       </div>
                     );
                   })}
                 </div>
-              </div>
-              {/* CARD: Resumo Financeiro (Novo) */}
-              <div className="lg:col-span-2 space-y-6">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center space-x-2"><Calculator size={16} /><span>Resumo Financeiro e Orçamento</span></h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                    <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Preço Base</p>
-                    <p className="text-sm font-bold text-slate-900">{formatCurrency(currentProposal.valor_proposto || currentProposal.orcamento_detalhado?.total.preco_base_eur || 0)}</p>
-                  </div>
-                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                    <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Custo Real Estimado</p>
-                    <p className="text-sm font-bold text-blue-600">{formatCurrency(currentProposal.orcamento_detalhado?.total.custo_real_eur || 0)}</p>
-                  </div>
-                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                    <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Margem / Gap</p>
-                    <p className={`text-sm font-bold ${currentProposal.orcamento_detalhado?.total.gap_eur && currentProposal.orcamento_detalhado.total.gap_eur < 0 ? 'text-red-500' : 'text-emerald-500'}`}>
-                      {formatCurrency(currentProposal.orcamento_detalhado?.total.gap_eur || 0)}
-                    </p>
-                  </div>
-                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                    <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Rentabilidade</p>
-                    <p className={`text-sm font-bold ${currentProposal.orcamento_detalhado?.total.gap_pct && currentProposal.orcamento_detalhado.total.gap_pct < 0 ? 'text-red-500' : 'text-emerald-500'}`}>
-                      {currentProposal.orcamento_detalhado?.total.gap_pct?.toFixed(1) || 0}%
-                    </p>
-                  </div>
-                </div>
-                {currentProposal.orcamento_detalhado?.recomendacao && (
-                  <div className="p-4 bg-purple-50 rounded-2xl border border-purple-100 text-purple-900 text-xs font-medium">
-                    <strong>Recomendação:</strong> {currentProposal.orcamento_detalhado.recomendacao}
+
+                {/* Dependência Lote */}
+                {currentProposal.dependencia_lote && (
+                  <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl">
+                    <h4 className="flex items-center gap-2 text-xs font-bold uppercase text-amber-700 mb-2"><AlertTriangle size={14} /> Dependência</h4>
+                    <p className="text-sm font-medium text-amber-900">Esta proposta depende da adjudicação de: <strong>{currentProposal.dependencia_lote}</strong></p>
                   </div>
                 )}
               </div>
 
-              <div className="lg:col-span-2 space-y-6">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center space-x-2"><Building2 size={16} /><span>Dados do Projeto</span></h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                    <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Local de Execução</p>
-                    <p className="text-sm font-bold text-slate-900">{currentProposal.local_execucao || 'Nacional / Sede'}</p>
+              {/* RIGHT COLUMNS (Span 2): Project Data & Finance */}
+              <div className="lg:col-span-2 space-y-8">
+
+                {/* 1. Project Header Info (Entidade, Prazos) */}
+                <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 grid grid-cols-2 md:grid-cols-4 gap-6">
+                  <div>
+                    <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Entidade</p>
+                    <p className="text-xs font-bold text-slate-900 line-clamp-2" title={currentProposal.entidade_contratante}>{currentProposal.entidade_contratante}</p>
+                    {currentProposal.nif_entidade && <p className="text-[10px] text-slate-500 font-mono mt-1">NIF: {currentProposal.nif_entidade}</p>}
                   </div>
-                  <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                    <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Custo RH Total ({currentProposal.prazo_execucao_meses} meses)</p>
-                    <p className="text-sm font-bold text-blue-600">{formatCurrency(rhTotalCost)}</p>
+                  <div>
+                    <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Critério</p>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold text-slate-900">{currentProposal.criterio_tipo === 'multifator' ? 'Multifator' : 'Monofator'}</span>
+                      {currentProposal.criterio_tipo === 'multifator' && (
+                        <span className="text-[9px] text-slate-500 font-medium">
+                          Preço {currentProposal.preco_peso_percentual}% / Qual. {currentProposal.qualidade_peso_percentual}%
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Prazos</p>
+                    <p className="text-xs font-bold text-slate-900 mb-0.5">{currentProposal.prazo_execucao_meses} Meses Execução</p>
+                    {currentProposal.data_limite_submissao && <p className="text-[10px] text-red-600 font-medium truncate">Entrega: {new Date(currentProposal.data_limite_submissao).toLocaleDateString()}</p>}
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Plataforma</p>
+                    <p className="text-xs font-bold text-slate-900 lowercase first-letter:uppercase">{currentProposal.plataforma}</p>
                   </div>
                 </div>
-                <div className="p-8 bg-slate-50 rounded-2xl border border-slate-100 text-slate-700 italic text-sm leading-relaxed">
-                  "{currentProposal.objeto}"
+
+                {/* 2. Financeiro (Updated to use JSON or Calculation) */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center space-x-2"><Calculator size={16} /><span>Resumo Financeiro</span></h3>
+                    {currentProposal.cenario_usado && <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-1 rounded-full uppercase">{currentProposal.cenario_usado}</span>}
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                      <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Valor Base</p>
+                      <p className="text-sm font-bold text-slate-900">{formatCurrency(currentProposal.valor_base_edital)}</p>
+                    </div>
+                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                      <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Custos Totais</p>
+                      {/* Use JSON value if exists, else calculation */}
+                      <p className="text-sm font-bold text-slate-700">
+                        {formatCurrency(
+                          currentProposal.orcamento?.base_calculo || totalInvestment
+                        )}
+                      </p>
+                    </div>
+                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                      {/* If JSON has Margem value directly */}
+                      <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Valor Proposto</p>
+                      <p className="text-sm font-bold text-blue-600">
+                        {formatCurrency(
+                          currentProposal.valor_proposto || (currentProposal.orcamento?.margem_valor ? (currentProposal.orcamento.base_calculo + currentProposal.orcamento.margem_valor) : proposedValue)
+                        )}
+                      </p>
+                    </div>
+                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                      <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Rentabilidade</p>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-sm font-bold ${(currentProposal.orcamento?.margem_percentual || realMarginPercent) < 5 ? 'text-red-500' : 'text-emerald-500'
+                          }`}>
+                          {(currentProposal.orcamento?.margem_percentual || realMarginPercent).toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+
+                {/* 3. Otimizações & Requisitos */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Otimizações */}
+                  {currentProposal.otimizacoes_aplicadas && currentProposal.otimizacoes_aplicadas.length > 0 && (
+                    <div className="bg-emerald-50/50 p-6 rounded-2xl border border-emerald-100">
+                      <h4 className="flex items-center gap-2 text-xs font-black uppercase text-emerald-700 mb-3"><Sparkles size={14} /> Otimizações Aplicadas</h4>
+                      <ul className="space-y-2">
+                        {currentProposal.otimizacoes_aplicadas.map((opt, i) => (
+                          <li key={i} className="text-xs font-medium text-emerald-900 flex items-start gap-2 text-justify">
+                            <CheckCircle size={14} className="mt-0.5 shrink-0 opacity-50" />
+                            <span>{opt}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {/* Requisitos */}
+                  {currentProposal.requisitos_validar && currentProposal.requisitos_validar.length > 0 && (
+                    <div className="bg-blue-50/50 p-6 rounded-2xl border border-blue-100">
+                      <h4 className="flex items-center gap-2 text-xs font-black uppercase text-blue-700 mb-3"><ClipboardList size={14} /> Requisitos a Validar</h4>
+                      <ul className="space-y-2">
+                        {currentProposal.requisitos_validar.map((req, i) => (
+                          <li key={i} className="text-xs font-medium text-blue-900 flex items-start gap-2 text-justify">
+                            <Target size={14} className="mt-0.5 shrink-0 opacity-50" />
+                            <span>{req}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                {/* Observações */}
+                {currentProposal.observacoes && (
+                  <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                    <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Observações</p>
+                    <p className="text-sm text-slate-700 italic">"{currentProposal.observacoes}"</p>
+                  </div>
+                )}
+
               </div>
             </div>
           </>)}
@@ -371,7 +453,7 @@ const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onBack, onD
                           <tr className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                             <th className="px-6 py-4">Lote</th>
                             <th className="px-6 py-4">Descrição</th>
-                            <th className="px-6 py-4 text-right">Preço Base</th>
+                            <th className="px-6 py-4 text-right">Valor Base</th>
                             <th className="px-6 py-4 text-right">Custo Total</th>
                             <th className="px-6 py-4 text-center">Gap (%)</th>
                             <th className="px-6 py-4 text-center">Viabilidade</th>
@@ -402,7 +484,7 @@ const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onBack, onD
                     </div>
                     <div className="space-y-4">
                       <div className="bg-slate-900 text-white p-6 rounded-2xl">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Total Gap (Preço Base vs Custo)</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Total Gap (Valor Base vs Custo)</p>
                         <p className={`text-3xl font-black ${currentProposal.orcamento_detalhado.total.gap_pct < 0 ? 'text-red-400' : 'text-green-400'}`}>
                           {currentProposal.orcamento_detalhado.total.gap_pct.toFixed(1)}%
                         </p>
