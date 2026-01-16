@@ -350,19 +350,18 @@ const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onBack, onD
                     {currentProposal.cenario_usado && <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-1 rounded-full uppercase">{currentProposal.cenario_usado}</span>}
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                       <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Valor Base</p>
                       <p className="text-sm font-bold text-slate-900">{formatCurrency(currentProposal.valor_base_edital)}</p>
                     </div>
                     <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                      <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Custos Totais</p>
-                      {/* Use JSON value if exists, else calculation */}
-                      <p className="text-sm font-bold text-slate-700">
-                        {formatCurrency(
-                          currentProposal.orcamento?.base_calculo || totalInvestment
-                        )}
-                      </p>
+                      <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Desconto (Face ao Base)</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-purple-600">
+                          {competitiveness.toFixed(1)}%
+                        </span>
+                      </div>
                     </div>
                     <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                       {/* If JSON has Margem value directly */}
@@ -372,15 +371,6 @@ const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onBack, onD
                           currentProposal.valor_proposto || (currentProposal.orcamento?.margem_valor ? (currentProposal.orcamento.base_calculo + currentProposal.orcamento.margem_valor) : proposedValue)
                         )}
                       </p>
-                    </div>
-                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                      <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Rentabilidade</p>
-                      <div className="flex items-center gap-2">
-                        <span className={`text-sm font-bold ${(currentProposal.orcamento?.margem_percentual || realMarginPercent) < 5 ? 'text-red-500' : 'text-emerald-500'
-                          }`}>
-                          {(currentProposal.orcamento?.margem_percentual || realMarginPercent).toFixed(1)}%
-                        </span>
-                      </div>
                     </div>
                   </div>
                 </div>
