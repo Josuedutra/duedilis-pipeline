@@ -7,13 +7,28 @@ import ProposalDetails from './components/ProposalDetails';
 import ImportModal from './components/ImportModal';
 import ProposalForm from './components/ProposalForm';
 import KanbanBoard from './components/KanbanBoard';
+import PartnerDashboard from './components/PartnerDashboard';
 import { Proposta, EstadoProposta } from './types';
 import { getProposals, saveProposal, deleteProposal, getProposalById } from './services/storage';
 import { parseSkillJson, parseBudgetJson, parseDecisionJson } from './services/importer';
 import { Loader2, ShieldAlert, Copy, Check, X } from 'lucide-react';
 
 const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'propostas' | 'detalhes' | 'kanban'>('dashboard');
+  // Check URL for partner mode
+  const isPartnerMode = typeof window !== 'undefined' && (
+    window.location.pathname === '/parceiro' || 
+    window.location.search.includes('parceiro=1') ||
+    window.location.hash === '#parceiro'
+  );
+
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'propostas' | 'detalhes' | 'kanban' | 'parceiro'>(
+    isPartnerMode ? 'parceiro' : 'dashboard'
+  );
+
+  // If partner mode, render only partner dashboard
+  if (currentPage === 'parceiro') {
+    return <PartnerDashboard onLogout={() => setCurrentPage('dashboard')} />;
+  }
   const [proposals, setProposals] = useState<Proposta[]>([]);
   const [selectedProposal, setSelectedProposal] = useState<Proposta | null>(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);

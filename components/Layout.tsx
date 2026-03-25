@@ -58,6 +58,13 @@ const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigate }) =>
         </nav>
 
         <div className="p-4 border-t border-slate-800 space-y-2">
+          <button
+            onClick={() => { onNavigate('parceiro'); setMobileMenuOpen(false); }}
+            className="w-full flex items-center space-x-3 px-4 py-3 text-slate-400 hover:bg-purple-900/40 hover:text-purple-300 rounded-lg transition-colors"
+          >
+            <Columns3 size={20} />
+            <span className="font-medium">Portal Parceiro</span>
+          </button>
           <button className="w-full flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white rounded-lg transition-colors">
             <Settings size={20} />
             <span className="font-medium">Definições</span>
