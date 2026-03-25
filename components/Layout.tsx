@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { LayoutDashboard, FileText, PlusCircle, Settings, LogOut, Menu, X, Columns3 } from 'lucide-react';
+import { useAuth } from './AuthGate';
+import { LayoutDashboard, FileText, Columns3, Users, LogOut, Menu, X } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -9,9 +10,10 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigate }) => {
+  const { session, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
-  const NavItem = ({ id, icon: Icon, label }: { id: string; icon: any; label: string }) => (
+  const NavItem = ({ id, icon: Icon, label, badge }: { id: string; icon: any; label: string; badge?: string }) => (
     <button
       onClick={() => {
         onNavigate(id);
@@ -23,6 +25,11 @@ const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigate }) =>
     >
       <Icon size={20} />
       <span className="font-medium">{label}</span>
+      {badge && (
+        <span className="ml-auto px-1.5 py-0.5 bg-purple-500/20 text-purple-300 rounded text-[9px] font-bold">
+          {badge}
+        </span>
+      )}
     </button>
   );
 
@@ -55,21 +62,22 @@ const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigate }) =>
           <NavItem id="dashboard" icon={LayoutDashboard} label="Dashboard" />
           <NavItem id="propostas" icon={FileText} label="Propostas" />
           <NavItem id="kanban" icon={Columns3} label="Kanban" />
+          <NavItem id="parceiros" icon={Users} label="Parceiros" badge="REDE" />
         </nav>
 
         <div className="p-4 border-t border-slate-800 space-y-2">
+          {session && (
+            <div className="px-4 mb-2">
+              <div className="text-xs font-semibold text-white truncate">{session.nome}</div>
+              <div className="text-[10px] text-slate-500 truncate">
+                {session.tipo === 'admin' ? 'Administrador' : 'Parceiro'}
+              </div>
+            </div>
+          )}
           <button
-            onClick={() => { onNavigate('parceiro'); setMobileMenuOpen(false); }}
-            className="w-full flex items-center space-x-3 px-4 py-3 text-slate-400 hover:bg-purple-900/40 hover:text-purple-300 rounded-lg transition-colors"
+            onClick={() => { logout(); setMobileMenuOpen(false); }}
+            className="w-full flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-red-400 rounded-lg transition-colors"
           >
-            <Columns3 size={20} />
-            <span className="font-medium">Portal Parceiro</span>
-          </button>
-          <button className="w-full flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white rounded-lg transition-colors">
-            <Settings size={20} />
-            <span className="font-medium">Definições</span>
-          </button>
-          <button className="w-full flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-red-400 rounded-lg transition-colors">
             <LogOut size={20} />
             <span className="font-medium">Sair</span>
           </button>
