@@ -24,11 +24,6 @@ const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<'dashboard' | 'propostas' | 'detalhes' | 'kanban' | 'parceiro'>(
     isPartnerMode ? 'parceiro' : 'dashboard'
   );
-
-  // If partner mode, render only partner dashboard
-  if (currentPage === 'parceiro') {
-    return <PartnerDashboard onLogout={() => setCurrentPage('dashboard')} />;
-  }
   const [proposals, setProposals] = useState<Proposta[]>([]);
   const [selectedProposal, setSelectedProposal] = useState<Proposta | null>(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -245,6 +240,11 @@ const App: React.FC = () => {
 ALTER TABLE propostas ADD COLUMN IF NOT EXISTS custos_diretos_percentual NUMERIC DEFAULT 5;
 ALTER TABLE propostas ADD COLUMN IF NOT EXISTS local_execucao TEXT;
 NOTIFY pgrst, 'reload schema';`;
+
+  // Partner mode: render only partner dashboard (after all hooks)
+  if (currentPage === 'parceiro') {
+    return <PartnerDashboard onLogout={() => setCurrentPage('dashboard')} />;
+  }
 
   return (
     <Layout
