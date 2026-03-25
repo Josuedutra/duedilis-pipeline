@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Proposta, EstadoProposta } from '../types';
 import { ESTADO_LABELS, formatCurrency } from '../constants';
-import { Building2, GripVertical, AlertCircle, Clock, Trash2, XCircle, CheckCircle2 } from 'lucide-react';
+import { Building2, GripVertical, AlertCircle, Clock, Trash2, XCircle, CheckCircle2, Layers } from 'lucide-react';
 
 interface KanbanBoardProps {
   proposals: Proposta[];
@@ -13,9 +13,9 @@ interface KanbanBoardProps {
 
 const KanbanBoard: React.FC<KanbanBoardProps> = ({ proposals, onMoveProposal, onSelect, onDelete }) => {
   const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [showPostContract, setShowPostContract] = useState(false);
 
-  // Lista explícita de todos os 6 estados na ordem correta do ciclo de vida
-  const states = [
+  const preContractStates = [
     EstadoProposta.PREPARACAO,
     EstadoProposta.SUBMETIDA,
     EstadoProposta.EM_ANALISE,
@@ -24,6 +24,18 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ proposals, onMoveProposal, on
     EstadoProposta.DECLINADA,
     EstadoProposta.CANCELADA
   ];
+
+  const postContractStates = [
+    EstadoProposta.EM_HABILITACAO,
+    EstadoProposta.CONTRATADA,
+    EstadoProposta.EM_EXECUCAO,
+    EstadoProposta.EM_ENCERRAMENTO,
+    EstadoProposta.CONCLUIDA
+  ];
+
+  const states = showPostContract ? postContractStates : preContractStates;
+
+  const postCount = postContractStates.reduce((n, s) => n + proposals.filter(p => p.estado === s).length, 0);
 
   const getProposalsByState = (state: EstadoProposta) =>
     proposals.filter(p => p.estado === state);
@@ -59,7 +71,25 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ proposals, onMoveProposal, on
 
   return (
     <div className="h-[calc(100vh-180px)] overflow-x-auto pb-8 animate-in fade-in duration-500 custom-scrollbar">
-      <div className="flex space-x-6 h-full min-w-max pr-12 pl-1">
+      <div className="flex items-center justify-between mb-4 px-1">
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={() => setShowPostContract(false)}
+            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${!showPostContract ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+          >
+            Pré-contratual
+          </button>
+          <button
+            onClick={() => setShowPostContract(true)}
+            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center space-x-2 ${showPostContract ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+          >
+            <Layers size={12} />
+            <span>Pós-contratual</span>
+            {postCount > 0 && <span className="bg-white/20 px-2 py-0.5 rounded-lg">{postCount}</span>}
+          </button>
+        </div>
+      </div>
+      <div className="flex space-x-6 h-[calc(100%-48px)] min-w-max pr-12 pl-1">
         {states.map((state) => {
           const columnProposals = getProposalsByState(state);
           const { label, color } = ESTADO_LABELS[state];
@@ -106,7 +136,10 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ proposals, onMoveProposal, on
                       {isLost && <XCircle className="absolute top-4 right-4 text-red-500/10" size={56} />}
 
                       <div className="flex justify-between items-start mb-3 relative z-10">
-                        <span className="text-[11px] font-black text-blue-600 tracking-tight">{p.referencia_concurso}</span>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-[11px] font-black text-blue-600 tracking-tight">{p.referencia_concurso}</span>
+                          {p.track === 'B' && <span className="text-[8px] font-black bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-md">B</span>}
+                        </div>
                         <div className="flex items-center space-x-1">
                           <button
                             onClick={(e) => { e.stopPropagation(); onDelete(p.id); }}

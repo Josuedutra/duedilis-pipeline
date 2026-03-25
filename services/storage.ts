@@ -49,7 +49,15 @@ export const saveProposal = async (proposal: Proposta): Promise<void> => {
     'pdf_proposta', 'pdf_ata_abertura', 'pdf_relatorio_final', 'tags', 'observacoes',
     'alerta_prazo', 'created_at', 'updated_at', 'created_by',
     'orcamento_detalhado', 'relatorio_decisao',
-    'cenario_usado', 'otimizacoes_aplicadas', 'requisitos_validar', 'dependencia_lote', 'orcamento'
+    'cenario_usado', 'otimizacoes_aplicadas', 'requisitos_validar', 'dependencia_lote', 'orcamento',
+    // Track B — Consórcio
+    'track', 'modelo_execucao', 'categoria_obra',
+    'markup_percentual', 'markup_decisao', 'fee_duedilis_percentual', 'fee_duedilis_valor',
+    'custos_comuns', 'subtotal_producao_secos', 'markup_valor', 'producao_com_markup',
+    'fator_complexidade', 'metodo_quotas',
+    'composicao_parceiros', 'distribuicao', 'tabelas_consultadas',
+    // Pós-adjudicação
+    'data_contrato', 'data_consignacao', 'data_recepcao_provisoria', 'percentual_faturado'
   ];
 
   const sanitizedProposal: any = {};

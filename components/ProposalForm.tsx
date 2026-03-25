@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, Briefcase, Users, Plus, Trash2, Euro, Info } from 'lucide-react';
+import { X, Save, Briefcase, Users, Plus, Trash2, Euro, Info, Layers } from 'lucide-react';
 import { Proposta, EstadoProposta, Plataforma, TipoServico, EquipaMembro } from '../types';
 import { getRhCosts, getRegionalFactors } from '../services/storage';
+import { isTrackB, TIPO_SERVICO_LABELS } from '../constants';
 
 interface ProposalFormProps {
   proposal?: Proposta | null;
@@ -24,11 +25,15 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ proposal, isOpen, onClose, 
     plataforma: Plataforma.OUTROS,
     tipo_servico: TipoServico.FISCALIZACAO,
     estado: EstadoProposta.PREPARACAO,
+    track: 'A',
+    modelo_execucao: 'interno',
     valor_base_edital: 0,
     valor_proposto: 0,
-    custos_diretos_percentual: 5, // Valor padrão dinâmico
+    custos_diretos_percentual: 5,
     custos_indiretos_percentual: 12,
     margem_percentual: 15,
+    markup_percentual: 30,
+    fee_duedilis_percentual: 12,
     prazo_execucao_meses: 0,
     local_execucao: '',
     equipa_resumo: [],
@@ -137,8 +142,65 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ proposal, isOpen, onClose, 
               <div className="lg:col-span-1"><label className={labelClass}>Referência</label><input type="text" required className={inputClass} value={formData.referencia_concurso} onChange={e => setFormData({...formData, referencia_concurso: e.target.value})} /></div>
               <div className="lg:col-span-3"><label className={labelClass}>Objeto</label><input type="text" required className={inputClass} value={formData.objeto} onChange={e => setFormData({...formData, objeto: e.target.value})} /></div>
               <div className="lg:col-span-2"><label className={labelClass}>Local</label><input type="text" className={inputClass} value={formData.local_execucao} onChange={e => setFormData({...formData, local_execucao: e.target.value})} /></div>
-              <div className="lg:col-span-2"><label className={labelClass}>Prazo (Meses)</label><input type="number" className={inputClass} value={formData.prazo_execucao_meses} onChange={e => setFormData({...formData, prazo_execucao_meses: parseInt(e.target.value) || 0})} /></div>
+              <div><label className={labelClass}>Prazo (Meses)</label><input type="number" className={inputClass} value={formData.prazo_execucao_meses} onChange={e => setFormData({...formData, prazo_execucao_meses: parseInt(e.target.value) || 0})} /></div>
+              <div>
+                <label className={labelClass}>Tipo de Serviço</label>
+                <select className={inputClass} value={formData.tipo_servico} onChange={e => {
+                  const tipo = e.target.value as TipoServico;
+                  const track = isTrackB(tipo) ? 'B' : 'A';
+                  const modelo = track === 'B' ? 'consorcio' as const : 'interno' as const;
+                  setFormData({...formData, tipo_servico: tipo, track, modelo_execucao: modelo});
+                }}>
+                  <optgroup label="Track A — Fiscalização">
+                    <option value={TipoServico.FISCALIZACAO}>{TIPO_SERVICO_LABELS[TipoServico.FISCALIZACAO]}</option>
+                    <option value={TipoServico.CSO}>{TIPO_SERVICO_LABELS[TipoServico.CSO]}</option>
+                    <option value={TipoServico.FISCALIZACAO_CSO}>{TIPO_SERVICO_LABELS[TipoServico.FISCALIZACAO_CSO]}</option>
+                    <option value={TipoServico.DIRECAO_OBRA}>{TIPO_SERVICO_LABELS[TipoServico.DIRECAO_OBRA]}</option>
+                    <option value={TipoServico.COORDENACAO_OBRA}>{TIPO_SERVICO_LABELS[TipoServico.COORDENACAO_OBRA]}</option>
+                  </optgroup>
+                  <optgroup label="Track B — Projetos / Consórcio">
+                    <option value={TipoServico.PROJETO_ARQUITETURA}>{TIPO_SERVICO_LABELS[TipoServico.PROJETO_ARQUITETURA]}</option>
+                    <option value={TipoServico.PROJETO_PAISAGISMO}>{TIPO_SERVICO_LABELS[TipoServico.PROJETO_PAISAGISMO]}</option>
+                    <option value={TipoServico.PROJETO_ARQUITETURA_ESPECIALIDADES}>{TIPO_SERVICO_LABELS[TipoServico.PROJETO_ARQUITETURA_ESPECIALIDADES]}</option>
+                    <option value={TipoServico.PROJETO_PAISAGISMO_ESPECIALIDADES}>{TIPO_SERVICO_LABELS[TipoServico.PROJETO_PAISAGISMO_ESPECIALIDADES]}</option>
+                    <option value={TipoServico.PROJETO_ESPECIALIDADES}>{TIPO_SERVICO_LABELS[TipoServico.PROJETO_ESPECIALIDADES]}</option>
+                    <option value={TipoServico.PROJETO_OUTRO}>{TIPO_SERVICO_LABELS[TipoServico.PROJETO_OUTRO]}</option>
+                  </optgroup>
+                </select>
+              </div>
             </div>
+            {formData.track === 'B' && (
+              <div className="p-4 bg-purple-50 rounded-2xl border border-purple-100">
+                <div className="flex items-center space-x-2 mb-3">
+                  <Layers size={14} className="text-purple-600" />
+                  <span className="text-[10px] font-black text-purple-600 uppercase tracking-widest">Consórcio — Track B</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className={labelClass}>Categoria Obra</label>
+                    <select className={inputClass} value={formData.categoria_obra || ''} onChange={e => setFormData({...formData, categoria_obra: e.target.value as any})}>
+                      <option value="">Selecionar...</option>
+                      <option value="urbanizacao">Urbanização (×1,00)</option>
+                      <option value="obras_novas">Obras Novas (×1,10)</option>
+                      <option value="reabilitacao">Reabilitação (×1,20)</option>
+                      <option value="acompanhamento">Acompanhamento (×0,85)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Markup (%)</label>
+                    <select className={inputClass} value={formData.markup_percentual || 30} onChange={e => setFormData({...formData, markup_percentual: parseInt(e.target.value)})}>
+                      <option value="30">30% — Default</option>
+                      <option value="45">45% — Moderado</option>
+                      <option value="50">50% — Premium</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Fee Duedilis (%)</label>
+                    <input type="number" step="1" className={inputClass} value={formData.fee_duedilis_percentual || 12} onChange={e => setFormData({...formData, fee_duedilis_percentual: parseInt(e.target.value) || 12})} />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="space-y-6">
